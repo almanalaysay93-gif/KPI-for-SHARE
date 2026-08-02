@@ -34,6 +34,20 @@ Working notes from reading all 193 source files. Companion to SHARE KPI Dashboar
 
 **Colour is semantic, never decorative.** Green/amber/red mean met/at-risk/breached and nothing else. The accent teal is a separate hue so a breach can never be confused with a heading.
 
+**Light theme only, from 2026-08-02.** The sheet is a printable form. A viewer's OS theme should not change how an official document reads, so the dark palette was removed rather than kept in sync.
+
+## What the live Master added, 2026-08-02
+
+Reading the POMD Referral Master itself — rather than the documents describing it — changed three things.
+
+**Detection had no denominator.** Every rate on the sheet was conditional on a referral already existing, which made the whole funnel blind to the patient nobody referred. DBI became a stage above referral for that reason, and referral rate is the number it exists to produce.
+
+**The POTENTIAL-only scope cannot work.** All 6 approaches and the 1 consent of 2026 are in the Eligible category; POTENTIAL has none. Scoping the daily funnel to POTENTIAL guarantees a permanently empty bottom half. The scope decision recorded in the KPI model predates this evidence and is now known to be wrong.
+
+**The timed log came out at the coordinator's request** and was replaced by a weekly and monthly summary drawn from the Master's own Update tabs. That is a real loss: the DCODC clocks were the only place the sheet could record a measurable failure, and nothing now captures them. It is recorded here so the trade-off is not rediscovered later as a bug.
+
+Data-quality findings from the same review — the `Elegible` misspelling on every eligible row, `EXPIRED` and `DNR/EXPIRY` disagreeing on who died, 31 spellings of ~10 room names, 5 unreadable referral dates, and 82 of 104 outcomes blank — are documented outside this repository, since the working files contain patient data.
+
 ## Open questions for the coordinator
 
 1. **Non-conversion reason codes.** The 8 options on the sheet are inferred. What does OTSU actually record? This is the field most likely to be wrong.

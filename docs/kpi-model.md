@@ -12,7 +12,7 @@ Metric definitions behind SHARE TC Daily KPI Dashboard. Every number traces to a
 
 ## Tier 1 — Timeliness (hard SLAs)
 
-Source: DCODC07312026. These are the only per-event time targets in the corpus, so they lead the sheet.
+Source: DCODC07312026. These are the only per-event time targets in the corpus.
 
 | KPI | Definition | Target | Fail flag |
 |---|---|---|---|
@@ -21,6 +21,31 @@ Source: DCODC07312026. These are the only per-event time targets in the corpus, 
 | Retrieval activation time | Consented eligibility confirmed → retrieval activated | **≤ 60 min** | > 60 min |
 
 Daily rollup: **SLA compliance %** = referrals meeting all applicable clocks ÷ referrals handled.
+
+> **Not captured on the current sheet.** These clocks were recorded by the timed referral log, which the weekly/monthly summary replaced. The definitions stay here because the targets remain in force and the measurement should return — but as built, the sheet does not record them. See Tier 1a, which measures a different and unsourced interval.
+
+## Tier 1a — Detection (DBI)
+
+Devastating brain injury is the pool from which potential donors come. The funnel previously began at referral, which made it blind to the eligible patient nobody referred; DBI supplies the missing denominator.
+
+| KPI | Definition | Target |
+|---|---|---|
+| DBI identified | Patients meeting DBI criteria on ER/ICU monitoring, per day, per unit | — |
+| **Referral rate** | Referred ÷ DBI identified | none set |
+| Referral lag | DBI identification → referral received | **none published** |
+| Missed-case rate | DBI who died unreferred ÷ DBI identified | — |
+
+Referral rate is what separates a detection problem from a conversation problem; without it the two are indistinguishable in the data.
+
+**DBI criteria are not defined anywhere in the corpus.** GCS < 7 is the sourced referral trigger, agreed by three independent documents — it is not a DBI definition, and setting the two equal would collapse the stage back into the one below it. No threshold is coded on the sheet. The unit must set the criteria, decide who makes the call, and decide whether recovered patients stay in the log (they should — a log containing only failures cannot produce a rate).
+
+## Tier 1b — Weekly and monthly position
+
+Source: the Master's own Weekly Update and Monthly Update tabs, so the daily sheet reports the same measures the Sheet already publishes.
+
+Total referred · expired · brain death declared · families approached · family consents · actual donors · **consent rate** = consents ÷ families approached.
+
+Week runs Monday to Sunday. Both scopes count all GCS categories, as those tabs do.
 
 ## Tier 2 — Donor funnel (volume + conversion)
 
@@ -43,7 +68,11 @@ At 25 potential cases across ~30 weeks, expect **roughly one every eight days**.
 
 Historical referral trend (all categories, DOD Referrals_SHARE-SPMC): 2020: 127 · 2021: 0 · 2022: 52 · 2023: 87 · 2024: 316 · 2025: 483.
 
-**The bottleneck is consent, not approach.** All 6 brain-death cases were approached; only 1 consented. Any intervention aimed at raising donor numbers should target the family conversation, not detection.
+**2026 is running well below that.** 104 referrals over 206 days to 26 July is **0.50/day**, against the ~1.3/day the 2025 total implies — 38% of the earlier rate. By month: Jan 36, Feb 3, Mar 7, Apr 9, May 10, Jun 8, Jul 14. Either detection fell away after January or January was a backlog dump. Worth resolving before the rate is quoted in a DOH submission, since it changes the story from growth to decline.
+
+**The bottleneck is consent, and the DNR decisions that precede any approach.** All 6 brain-death cases were approached; only 1 consented. But 17 rows record `FAMILY OPTED DNR = YES` against just 6 approaches — nearly three times as many families reached a DNR decision before donation was ever raised. If that holds, the binding constraint sits earlier than the family conversation and is a question of *when* the coordinator reaches the family, which is what Tier 1a's referral lag measures.
+
+**The daily funnel's POTENTIAL-only scope is defective.** Conversion events by category, 2026 YTD: brain death declared — 0 possible, 2 potential, 4 Elegible; families approached — 0, **0**, 6; consents — 0, **0**, 1. Every approach and the single consent are in the Eligible category (spelled `Elegible` in the source). A daily sheet scoped to POTENTIAL would have recorded zero approaches and zero consents across seven months. Cases are re-graded as they progress: POTENTIAL is intake, Eligible is where the family conversation happens. The recommended fix is to track POTENTIAL and Eligible together so escalation reads as a state change rather than a disappearance. Unresolved.
 
 **Documentation completeness is a real KPI.** 82 of 104 final outcomes read "Unspecified" and the Master carries a dedicated *Data conflicts* column. Percentage of closed cases with a specified outcome belongs on the monthly rollup.
 

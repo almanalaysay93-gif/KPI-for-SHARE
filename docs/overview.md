@@ -53,12 +53,16 @@ Shift window: **07:00–15:00, Mon–Fri** (from the Citizens Charter).
 Taken from the live POMD Referral Master 2026 sheet, not inferred:
 
 ```
-Referral (GCS<7)  →  GCS category: possible / POTENTIAL / eligible
-                  →  Brain death declared  →  Family approached
-                  →  Family consent  →  Actual donor
+DBI identified (ER / ICU monitoring)
+      ├── not referred ────────────►  missed case
+      └── Referral (GCS<7)  →  GCS category: possible / POTENTIAL / eligible
+                            →  Brain death declared  →  Family approached
+                            →  Family consent  →  Actual donor
 ```
 
-**The daily sheet is scoped to the POTENTIAL category only** — 25 of 104 cases in 2026 YTD. Every stage has a countable daily event and a derivable rate. See SHARE KPI Model.
+The DBI stage was added on 2026-08-02. It is the detection pool above referral, logged from the ER and ICU monitoring sheets, and it supplies the denominator the funnel previously lacked.
+
+**The daily funnel is still scoped to the POTENTIAL category only** — 25 of 104 cases in 2026 YTD — and that scope is known to be wrong: all 6 family approaches and the single consent of 2026 sit in the Eligible category, none in POTENTIAL. See SHARE KPI Model, Tier 2.
 
 ## Live systems this must feed
 
@@ -70,9 +74,14 @@ Downloaded from the shared Drive folder on 2026-08-01 (782 MB, 184 files, 5 subf
 
 ## Open questions
 
+- **What are the DBI criteria?** Undefined across all 193 source files. Needs a GCS threshold and a measurement point, a decision on who makes the call, and confirmation that recovered patients stay in the log.
+- **Does the funnel keep its POTENTIAL-only scope?** As it stands the daily funnel cannot record an approach or a consent, because those happen after re-grading to Eligible. Recommended fix: track POTENTIAL and Eligible together.
+- **Should the DCODC clocks come back?** Removing the timed referral log removed the only per-event SLA measurement on the sheet. The 10 / 60 / 60-minute targets remain in force regardless.
+- **How should the sheet paginate?** It currently overflows two Letter pages. Accept the longer print, or run a compaction pass.
 - Which role does the first printed version target — CTC, PTC, or a single sheet with a role toggle?
 - ~~Are Consented / Utilized counts recorded anywhere?~~ **Answered** by POMD Referral Master 2026: 1 consent, 1 actual donor, 17% consent rate for 2026.
 - Does the dashboard need to survive as a photocopied master (pure B&W, no fills) or will it always print in colour?
 - Should the daily sheet's counts write back into the Master sheet automatically, or stay a paper-first record that a coordinator transcribes?
 - The Master has 82 "Unspecified" outcomes and a *Data conflicts* column — is cleaning that backlog in scope, or strictly forward-looking from here?
+- **Is the Master's sharing locked down?** On 2026-08-02 it was readable without a Google account, exposing names and HRNs for 104 patients.
 
