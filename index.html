@@ -988,22 +988,15 @@
   }
 
   var CHARTER = [
-    ["General inquiry", "20 min"],
-    ["KT orientation", "200 min"],
-    ["Request for KT ethics evaluation", "60 min"],
-    ["Request for enlistment, national waiting list", "30 min"],
-    ["Submission of requirements for enlistment", "60 min"]
+    ["General inquiry", "20 min", 20],
+    ["KT orientation", "200 min", 200],
+    ["Request for KT ethics evaluation", "60 min", 60],
+    ["Request for enlistment, national waiting list", "30 min", 30],
+    ["Submission of requirements for enlistment", "60 min", 60]
   ];
 
   var ACTIVITIES = {
     CTC: [
-      ["Citizen&#39;s Charter services", null],
-      ["General inquiry", 20],
-      ["KT orientation", 210],
-      ["Request for KT evaluation", 60],
-      ["Request for enlistment to national waiting list", 30],
-      ["Submission of requirements for enlistment", 60],
-      ["Other clinical coordination", null],
       ["Entry / updating of patient records", 32],
       ["Coordination: extraction, packaging &amp; send-out", 120],
       ["Coordination: intra-transplant (OR &amp; ward)", 480],
@@ -1327,6 +1320,18 @@
         total += sub;
         cell.textContent = sub;
       }
+    });
+    return total;
+  }
+
+  /* the Citizen's Charter table is the one place clients-served is entered -
+     its minutes feed the workload index rather than being typed a second time
+     in the activity log, which used to hold a duplicate Charter-services group */
+  function charterMinutes() {
+    var total = 0;
+    Array.prototype.forEach.call(document.querySelectorAll("#charter-body tr"), function (row, i) {
+      var served = parseFloat(row.querySelector("[data-cc=served]").value) || 0;
+      total += served * CHARTER[i][2];
     });
     return total;
   }
@@ -1767,14 +1772,25 @@
     html += para("Administration, coordination &amp; outreach", sentences(lists.admin));
 
     /* --- activity and time log, with the shift arithmetic spelled out --- */
+    var cm = charterMinutes();
     var actText = "";
-    if (acts.items.length) {
-      actText = sentences(["Time was logged against the " + roleKey.replace("_", "/") +
-                           " standard-minute schedule (TC Activities/Services)."].concat(acts.items));
-      actText += " Productive time for the shift totals " + acts.total + " minute" +
-                 (acts.total === 1 ? "" : "s") + " against the " + SHIFT_MIN +
+    if (acts.items.length || cm) {
+      var actBits = [];
+      if (acts.items.length) {
+        actBits.push("Time was logged against the " + roleKey.replace("_", "/") +
+                     " standard-minute schedule (TC Activities/Services).");
+        actBits = actBits.concat(acts.items);
+      }
+      if (cm) {
+        actBits.push("Citizen&#39;s Charter services (above) contributed a further " + cm +
+                     " minute" + (cm === 1 ? "" : "s") + " of productive time.");
+      }
+      var grandTotal = acts.total + cm;
+      actText = sentences(actBits);
+      actText += " Productive time for the shift totals " + grandTotal + " minute" +
+                 (grandTotal === 1 ? "" : "s") + " against the " + SHIFT_MIN +
                  "-minute charter shift, a workload index of " +
-                 (acts.total / SHIFT_MIN).toFixed(2) + ".";
+                 (grandTotal / SHIFT_MIN).toFixed(2) + ".";
     }
     html += para("Activity &amp; time log", actText);
 
@@ -1792,7 +1808,7 @@
   }
 
   function compute() {
-    var mins = computeActivities();
+    var mins = computeActivities() + charterMinutes();
     computeRoutine();
     computeFunnel(computeDbi());
     computeWm();
