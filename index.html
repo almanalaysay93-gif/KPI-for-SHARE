@@ -1609,7 +1609,7 @@
       }
 
       if (isPrep) {
-        researchOngoing.push(research);
+        researchOngoing.push(statusSentence);
       } else if (groups[sel.value]) {
         groups[sel.value].push(ROUTINE_PHRASE[i]);
       }
@@ -1620,7 +1620,7 @@
 
   /* the routine items collapse by status so the paragraph reads as prose,
      not as one near-identical sentence per task */
-  function routineProse(g, researchOngoing) {
+  function routineProse(g, researchLines) {
     var out = [];
     var many = function (list) { return list.length !== 1; };
 
@@ -1643,8 +1643,8 @@
       out.push(capFirst(listPhrase(g.Cancelled)) + (many(g.Cancelled) ? " were" : " was") +
                " cancelled for the day.");
     }
-    if (researchOngoing && researchOngoing.length) {
-      out.push(researchPrepSentence(researchOngoing));
+    if (researchLines && researchLines.length) {
+      out = out.concat(researchLines);
     }
     return sentences(out);
   }
