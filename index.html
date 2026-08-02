@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,42 +28,6 @@
     --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
     --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      color-scheme: dark;
-      --paper:#11151a;
-      --band:#171f26;
-      --ink:#e9eef2;
-      --ink-2:#a7b3be;
-      --ink-3:#7e8b97;
-      --rule:#28313a;
-      --rule-strong:#44515c;
-      --accent:#4ec2a8;
-      --accent-soft:#123029;
-      --ok:#4dbd8d;
-      --warn:#d5a343;
-      --crit:#e3696f;
-      --field:#161d24;
-    }
-  }
-
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --paper:#11151a;
-    --band:#171f26;
-    --ink:#e9eef2;
-    --ink-2:#a7b3be;
-    --ink-3:#7e8b97;
-    --rule:#28313a;
-    --rule-strong:#44515c;
-    --accent:#4ec2a8;
-    --accent-soft:#123029;
-    --ok:#4dbd8d;
-    --warn:#d5a343;
-    --crit:#e3696f;
-    --field:#161d24;
   }
 
   :root[data-theme="light"] {
@@ -118,8 +82,6 @@
   .btn:hover { border-color: var(--accent); color: var(--accent); }
   .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  :root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary { color: var(--paper); }
-  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .btn-primary { color: #fff; } }
   .btn-primary:hover { filter: brightness(1.08); color: #fff; }
   .saved-note {
     font: 500 11px/1 var(--mono);
@@ -446,7 +408,7 @@
   /* ---------- funnel ---------- */
   .funnel {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);   /* 8 stages, two rows of four */
     border: 1px solid var(--rule-strong);
   }
   .funnote {
@@ -454,8 +416,20 @@
     color: var(--ink-3);
     margin: 4px 0 0;
   }
+
+  /* ---------- DBI inline stat line ---------- */
+  .dbistat strong { color: var(--ink); font-weight: 700; }
   .fstage { padding: 7px 8px 8px; border-right: 1px solid var(--rule); text-align: center; }
-  .fstage:last-child { border-right: 0; }
+  .fstage:nth-child(4n) { border-right: 0; }
+  .fstage:nth-child(n+5) { border-top: 1px solid var(--rule); }
+  /* the two DBI stages are derived from the log above, not typed */
+  .fstage.auto { background: var(--band); }
+  .fstage .f-val {
+    font: 600 15px/1.2 var(--sans);
+    color: var(--ink);
+    margin: 3px auto 0;
+    padding: 4px 2px;
+  }
   .fstage .f-lbl {
     font-size: 8px;
     font-weight: 700;
@@ -550,10 +524,9 @@
     margin: 9px 0 3px;
   }
   .narrative h3:first-child { margin-top: 0; }
-  .narrative p { margin: 0 0 4px; }
+  .narrative p { margin: 0 0 7px; }
+  .narrative p:last-child { margin-bottom: 0; }
   .narrative .empty { color: var(--ink-3); font-style: italic; }
-  .narrative ul { margin: 0; padding-left: 15px; }
-  .narrative li { margin-bottom: 2px; }
   #btn-copy { margin-top: 8px; }
 
   /* ---------- activity log ---------- */
@@ -668,28 +641,29 @@
   <summary>Load from POMD Referral Master 2026</summary>
 
   <p class="how">
-    In the Sheet, open the <code>Master</code> tab, select the header row plus the rows you want,
+    In the Sheet, open the <code>Master</code> tab, select the header row plus every row of the current month,
     copy, and paste below. Column order does not matter &mdash; columns are matched by name
-    (<code>HRN</code>, <code>ROOM</code>, <code>GCS UPON REFERRAL</code>, <code>GCS CATEGORY</code>,
-    <code>DATE OF REFERRAL</code>, <code>BRAIN DEATH DECLARED</code>, <code>FAMILY APPROACHED</code>,
-    <code>FAMILY CONSENT</code>, <code>FINAL OUTCOME / STATUS</code>). Tab-separated or CSV both work.
+    (<code>DATE OF REFERRAL</code>, <code>GCS CATEGORY</code>, <code>EXPIRED</code>,
+    <code>BRAIN DEATH DECLARED</code>, <code>FAMILY APPROACHED</code>,
+    <code>FAMILY CONSENT</code>, <code>ORGANS DONATED</code>, <code>FINAL OUTCOME / STATUS</code>).
+    Tab-separated or CSV both work.
   </p>
 
   <textarea id="imp-paste" placeholder="Paste the header row and the case rows here..." spellcheck="false"></textarea>
 
   <div class="imp-controls">
-    <label class="opt"><input type="radio" name="impscope" value="date" checked> Only cases referred on the sheet date</label>
-    <label class="opt"><input type="radio" name="impscope" value="all"> All potential cases in the paste</label>
-    <button class="btn btn-primary" id="btn-import">Import potential cases</button>
+    <button class="btn btn-primary" id="btn-import">Build week &amp; month totals</button>
     <button class="btn" id="btn-import-clear">Clear paste</button>
   </div>
 
   <div class="imp-status" id="imp-status"></div>
 
   <p class="imp-privacy">
-    Only cases in the <strong>POTENTIAL</strong> GCS category are imported. The
-    <code>NAME</code> column is discarded on import and never stored &mdash; the sheet keeps HRN only,
-    per the Data Privacy Act of 2012 (RA 10173). Nothing is sent anywhere; parsing happens in this page.
+    Rows are counted, never copied &mdash; no case detail reaches the sheet, and the <code>NAME</code>
+    column is discarded on read, per the Data Privacy Act of 2012 (RA 10173).
+    Week runs Monday to Sunday around the sheet date; the month is the sheet date&#39;s month;
+    the daily funnel below takes only <strong>POTENTIAL</strong> cases dated on the sheet date.
+    Nothing is sent anywhere; parsing happens in this page.
   </p>
 </details>
 
@@ -738,9 +712,9 @@
     </div>
     <div class="kpiband">
       <div class="kpi" id="kpi-sla" data-state="idle">
-        <span class="k-lbl">SLA compliance</span>
+        <span class="k-lbl">Referral rate</span>
         <div class="k-val" id="kpi-sla-val">&mdash;</div>
-        <div class="k-sub" id="kpi-sla-sub">no referrals logged</div>
+        <div class="k-sub" id="kpi-sla-sub">no DBI cases logged</div>
       </div>
       <div class="kpi" id="kpi-ref" data-state="idle">
         <span class="k-lbl">Potential donors today</span>
@@ -760,29 +734,60 @@
     </div>
   </section>
 
-  <!-- REFERRAL LOG -->
+  <!-- DBI MONITORING -->
   <section class="sec">
     <div class="sechead">
-      <h2>Potential organ donor log &mdash; timed</h2>
-      <span class="src">POTENTIAL category only &middot; DCODC 2026: ack &le;10 min &middot; TC response &le;60 min &middot; activation &le;60 min</span>
+      <h2>Devastating brain injury (DBI) monitoring &mdash; ER &amp; ICU</h2>
+      <span class="src">detection pool above referral &middot; criteria pending OTSU sign-off</span>
     </div>
     <table>
       <thead>
         <tr>
-          <th style="width:14%">Case ID / HRN</th>
-          <th style="width:11%">Room</th>
-          <th class="num" style="width:7%">GCS</th>
-          <th class="num" style="width:9%">Received</th>
-          <th class="num" style="width:8%">Ack&#39;d</th>
-          <th class="num" style="width:6%">&Delta;10</th>
-          <th class="num" style="width:8%">TC resp.</th>
-          <th class="num" style="width:6%">&Delta;60</th>
-          <th style="width:12%">Outcome</th>
-          <th>Non-conversion reason</th>
+          <th style="width:13%">Case ID / HRN</th>
+          <th style="width:10%">Unit</th>
+          <th class="num" style="width:6%">GCS</th>
+          <th class="num" style="width:9%">Identified</th>
+          <th style="width:9%">Referred</th>
+          <th class="num" style="width:9%">Ref. time</th>
+          <th class="num" style="width:6%">Lag</th>
+          <th style="width:19%">Reason not referred</th>
+          <th>Outcome</th>
         </tr>
       </thead>
-      <tbody id="referral-body"></tbody>
+      <tbody id="dbi-body"></tbody>
     </table>
+    <p class="funnote dbistat">
+      <strong id="dbi-found">0</strong> identified &middot;
+      <strong id="dbi-referred">0</strong> referred &middot;
+      referral rate <strong id="dbi-rate">&mdash;</strong> &middot;
+      lag <strong id="dbi-lag">&mdash;</strong>.
+      Lag runs from identification to referral received and has no published target.
+      DBI criteria and reason codes need OTSU sign-off.
+    </p>
+  </section>
+
+  <!-- WEEKLY / MONTHLY UPDATE -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Weekly &amp; monthly update &mdash; POMD Referral Master</h2>
+      <span class="src" id="wm-period">mirrors the Weekly Update and Monthly Update tabs</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Measure</th>
+          <th class="num" style="width:18%" id="wm-th-week">This week</th>
+          <th class="num" style="width:18%" id="wm-th-month">This month</th>
+          <th class="num" style="width:16%">2026 YTD</th>
+        </tr>
+      </thead>
+      <tbody id="wm-body"></tbody>
+    </table>
+    <p class="funnote">
+      Counts cover all GCS categories, as the Master&#39;s own Weekly and Monthly Update tabs do.
+      YTD column is the 2026 programme position to 26 July: 104 referrals, 6 brain death declared, 6 approached, 1 consent, 1 actual donor.
+      Expired YTD is the <code>EXPIRED</code> column; the Master&#39;s <code>DNR/EXPIRY</code> column disagrees with it (33) and the conflict is unresolved.
+    </p>
   </section>
 
   <!-- FUNNEL -->
@@ -792,10 +797,20 @@
       <span class="src">stages and vocabulary mirror the POMD Referral Master 2026 dashboard</span>
     </div>
     <div class="funnel">
+      <div class="fstage auto">
+        <span class="f-lbl">DBI identified</span>
+        <div class="f-val" id="fn-dbi">0</div>
+        <div class="f-rate">&nbsp;</div>
+      </div>
+      <div class="fstage auto">
+        <span class="f-lbl">Referred to SHARE</span>
+        <div class="f-val" id="fn-dbiref">0</div>
+        <div class="f-rate" id="rate-dbiref">&nbsp;</div>
+      </div>
       <div class="fstage">
         <span class="f-lbl">Potential donors</span>
         <input type="number" min="0" step="1" id="fn-referrals" placeholder="0">
-        <div class="f-rate">&nbsp;</div>
+        <div class="f-rate" id="rate-potential">&nbsp;</div>
       </div>
       <div class="fstage">
         <span class="f-lbl">Escalated to eligible</span>
@@ -824,6 +839,7 @@
       </div>
     </div>
     <p class="funnote">
+      The first two stages are derived from the DBI monitoring log above and are not typed here.
       Scope: GCS category POTENTIAL only &mdash; 25 of 104 referrals in 2026 to date, roughly one every eight days.
       Programme funnel 2026: 6 escalated to eligible &rarr; 6 brain death declared &rarr; 6 families approached &rarr; 1 consent &rarr; 1 actual donor. Consent rate 17%.
       Cases graded possible (73) stay in the POMD Referral Master and are not tracked on this sheet.
@@ -953,11 +969,15 @@
   "use strict";
 
   var SHIFT_MIN = 480;          // 07:00-15:00
-  var ACK_SLA   = 10;           // minutes
-  var RESP_SLA  = 60;           // minutes
   var REF_BASE  = 1;            // 25 potential donors in 2026 YTD - roughly 1 every 8 days
 
   var STATUSES = ["", "Completed", "Ongoing", "Pending", "Deferred", "Cancelled"];
+
+  var ROLE_LABEL = {
+    CTC:    "Clinical Transplant Coordinator (CTC)",
+    PTC_RN: "Procurement Transplant Coordinator, RN (PTC/RN)",
+    PTC_MD: "Procurement Transplant Coordinator, MD (PTC/MD)"
+  };
 
   /* ---------- source data ---------- */
 
@@ -1110,14 +1130,33 @@
     ]
   };
 
-  /* vocabulary mirrored from POMD Referral Master 2026 */
-  var OUTCOMES = ["", "Monitoring", "Recovered", "Expired", "DNR",
-                  "Brain death declared", "Actual donor", "Pending"];
-  var REASONS = ["", "Family refusal", "DNR / family opted DNR", "Medical unsuitability",
-                 "No brain death declaration", "Cardiac arrest before retrieval", "Late referral",
-                 "Logistics / OR unavailable", "Recipient unavailable", "Other"];
+  /* the measures on the Master's own Weekly Update and Monthly Update tabs,
+     with the 2026 YTD position to 26 July as the reference column */
+  var WM_ROWS = [
+    ["total",   "Total patients referred", "104"],
+    ["expired", "Expired",                 "83"],
+    ["bd",      "Brain death declared",    "6"],
+    ["appr",    "Families approached",     "6"],
+    ["cons",    "Family consents",         "1"],
+    ["donors",  "Actual donors",           "1"]
+  ];
 
-  var REFERRAL_ROWS = 5;
+  var MONTHS = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+
+  /* ---------- DBI: the detection pool above referral ----------
+     Criteria and the reason-not-referred codes are a first draft and need OTSU
+     sign-off. GCS < 7 is the sourced *referral* trigger (DCODC), not the DBI
+     definition - nothing in the corpus defines DBI, so no threshold is coded here. */
+  var DBI_ROWS = 3;
+
+  var DBI_UNITS = ["", "ER", "ICU", "CIU", "Medward", "Surgery", "Other"];
+  var DBI_REFERRED = ["", "Yes", "No", "Pending"];
+  var DBI_NOREF = ["", "Recovered / improved", "Family already DNR", "Medical contraindication",
+                   "Age or clinical exclusion", "Cardiac arrest before referral",
+                   "Transferred out", "Not identified in time", "Other"];
+  var DBI_OUTCOME = ["", "Under monitoring", "Recovered", "Expired",
+                     "Progressed to brain death"];
 
   /* ---------- helpers ---------- */
 
@@ -1156,27 +1195,110 @@
     return Math.round((a / b) * 100);
   }
 
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function capFirst(s) {
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  }
+
+  /* lowercase a label for mid-sentence use without flattening acronyms
+     (KT, NKTI, OR, LOA, HCES stay upper) */
+  function softLower(s) {
+    return s.replace(/[A-Za-z]+/g, function (w) {
+      if (w.length > 1 && w === w.toUpperCase()) { return w; }
+      return w.charAt(0).toLowerCase() + w.slice(1);
+    });
+  }
+
+  /* "a", "a and b", "a, b and c" - for prose lists */
+  function listPhrase(items) {
+    if (!items.length) { return ""; }
+    if (items.length === 1) { return items[0]; }
+    return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+  }
+
+  function sentences(arr) {
+    return arr.filter(Boolean).join(" ");
+  }
+
+  function para(title, text) {
+    if (!text) { return ""; }
+    return "<h3>" + title + "</h3><p>" + text + "</p>";
+  }
+
   /* ---------- build the DOM ---------- */
 
-  function buildReferrals(rows) {
-    var total = Math.max(REFERRAL_ROWS, rows || 0);
+  function buildWm() {
+    var html = WM_ROWS.map(function (r) {
+      return "<tr data-wm='" + r[0] + "'>" +
+        "<td>" + r[1] + "</td>" +
+        "<td class='num'><input type='number' min='0' step='1' data-p='week' placeholder='0'></td>" +
+        "<td class='num'><input type='number' min='0' step='1' data-p='month' placeholder='0'></td>" +
+        "<td class='num mono' style='color:var(--ink-3)'>" + r[2] + "</td>" +
+      "</tr>";
+    }).join("");
+
+    /* consent rate is derived from the two rows above it, never typed */
+    html += "<tr data-wm='rate'>" +
+      "<td>Consent rate</td>" +
+      "<td class='num mono' id='wm-rate-week'>&mdash;</td>" +
+      "<td class='num mono' id='wm-rate-month'>&mdash;</td>" +
+      "<td class='num mono' style='color:var(--ink-3)'>17%</td>" +
+    "</tr>";
+
+    el("wm-body").innerHTML = html;
+  }
+
+  /* the Master's Weekly Update tab runs Monday to Sunday */
+  function weekRange(value) {
+    if (!value) { return null; }
+    var p = value.split("-");
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    if (isNaN(d.getTime())) { return null; }
+    var back = (d.getDay() + 6) % 7;                  // Monday = 0
+    var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() - back);
+    var sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+    return { start: mon, end: sun };
+  }
+
+  function renderPeriod() {
+    var r = weekRange(el("f-date").value);
+    var box = el("wm-period");
+    if (!r) {
+      box.textContent = "mirrors the Weekly Update and Monthly Update tabs";
+      return;
+    }
+    var sameMonth = r.start.getMonth() === r.end.getMonth();
+    var span = MONTHS[r.start.getMonth()] + " " + r.start.getDate() + " - " +
+               (sameMonth ? "" : MONTHS[r.end.getMonth()] + " ") + r.end.getDate() + ", " +
+               r.end.getFullYear();
+    var p = el("f-date").value.split("-");
+    box.textContent = "Week: " + span + "  |  Month: " + MONTHS[+p[1] - 1] + " " + p[0];
+    el("wm-th-week").textContent = "Week to " + r.end.getDate() + " " +
+                                   MONTHS[r.end.getMonth()].slice(0, 3);
+    el("wm-th-month").textContent = MONTHS[+p[1] - 1].slice(0, 3) + " " + p[0];
+  }
+
+  function buildDbi(rows) {
+    var total = Math.max(DBI_ROWS, rows || 0);
     var html = "";
     for (var i = 0; i < total; i++) {
       html +=
-        "<tr data-ref='" + i + "'>" +
-          "<td><input type='text' data-f='id' placeholder='HRN'></td>" +
-          "<td><input type='text' data-f='room' placeholder='ICU'></td>" +
-          "<td class='num'><input type='number' data-f='gcs' min='3' max='15' placeholder='&ndash;'></td>" +
-          "<td class='num'><input type='time' data-f='recv'></td>" +
-          "<td class='num'><input type='time' data-f='ack'></td>" +
-          "<td class='num'><span class='flag idle' data-f='ackflag'>&mdash;</span></td>" +
-          "<td class='num'><input type='time' data-f='resp'></td>" +
-          "<td class='num'><span class='flag idle' data-f='respflag'>&mdash;</span></td>" +
-          "<td><select data-f='outcome'>" + options(OUTCOMES) + "</select></td>" +
-          "<td><select data-f='reason'>" + options(REASONS) + "</select></td>" +
+        "<tr data-dbi='" + i + "'>" +
+          "<td><input type='text' data-d='id' placeholder='HRN'></td>" +
+          "<td><select data-d='unit'>" + options(DBI_UNITS) + "</select></td>" +
+          "<td class='num'><input type='number' data-d='gcs' min='3' max='15' placeholder='&ndash;'></td>" +
+          "<td class='num'><input type='time' data-d='found'></td>" +
+          "<td><select data-d='ref'>" + options(DBI_REFERRED) + "</select></td>" +
+          "<td class='num'><input type='time' data-d='reftime'></td>" +
+          "<td class='num'><span class='flag idle' data-d='lagflag'>&mdash;</span></td>" +
+          "<td><select data-d='noref'>" + options(DBI_NOREF) + "</select></td>" +
+          "<td><select data-d='outcome'>" + options(DBI_OUTCOME) + "</select></td>" +
         "</tr>";
     }
-    el("referral-body").innerHTML = html;
+    el("dbi-body").innerHTML = html;
   }
 
   function buildCharter() {
@@ -1289,46 +1411,31 @@
     el(id + "-sub").innerHTML = sub;
   }
 
-  function computeReferrals() {
-    var rows = document.querySelectorAll("[data-ref]");
-    var clocks = 0, met = 0, logged = 0;
+  function wmVal(key, period) {
+    var row = document.querySelector("[data-wm='" + key + "']");
+    if (!row) { return 0; }
+    var c = row.querySelector("[data-p=" + period + "]");
+    var v = c ? parseFloat(c.value) : NaN;
+    return isNaN(v) ? 0 : v;
+  }
 
-    Array.prototype.forEach.call(rows, function (row) {
-      var get = function (f) { return row.querySelector("[data-f=" + f + "]"); };
-      var recv = get("recv").value;
-      var ack  = get("ack").value;
-      var resp = get("resp").value;
-
-      if (get("id").value.trim() || recv) { logged++; }
-
-      var dAck = delta(recv, ack);
-      var fAck = get("ackflag");
-      if (dAck === null) {
-        fAck.className = "flag idle";
-        fAck.innerHTML = "&mdash;";
-      } else {
-        clocks++;
-        var okAck = dAck <= ACK_SLA;
-        if (okAck) { met++; }
-        fAck.className = "flag " + (okAck ? "ok" : "bad");
-        fAck.textContent = dAck + "m";
-      }
-
-      var dResp = delta(recv, resp);
-      var fResp = get("respflag");
-      if (dResp === null) {
-        fResp.className = "flag idle";
-        fResp.innerHTML = "&mdash;";
-      } else {
-        clocks++;
-        var okResp = dResp <= RESP_SLA;
-        if (okResp) { met++; }
-        fResp.className = "flag " + (okResp ? "ok" : "bad");
-        fResp.textContent = dResp + "m";
-      }
+  function computeWm() {
+    var out = {};
+    ["week", "month"].forEach(function (p) {
+      var appr = wmVal("appr", p), cons = wmVal("cons", p);
+      var rate = pct(cons, appr);
+      el("wm-rate-" + p).innerHTML = (rate === null) ? "&mdash;" : rate + "%";
+      out[p] = {
+        total: wmVal("total", p),
+        expired: wmVal("expired", p),
+        bd: wmVal("bd", p),
+        appr: appr,
+        cons: cons,
+        donors: wmVal("donors", p),
+        rate: rate
+      };
     });
-
-    return { clocks: clocks, met: met, logged: logged };
+    return out;
   }
 
   function computeActivities() {
@@ -1359,7 +1466,46 @@
     return { done: done, applicable: applicable, total: sels.length };
   }
 
-  function computeFunnel() {
+  /* DBI monitoring - the detection pool. Referral lag has no published target,
+     so the lag cell reports the interval without passing or failing it. */
+  function computeDbi() {
+    var found = 0, referred = 0, notReferred = 0, lags = [];
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-dbi]"), function (row) {
+      var g = function (f) { return row.querySelector("[data-d=" + f + "]"); };
+      var identified = g("id").value.trim() || g("found").value;
+      if (identified) { found++; }
+
+      var state = g("ref").value;
+      if (state === "Yes") { referred++; }
+      if (state === "No") { notReferred++; }
+
+      var lag = delta(g("found").value, g("reftime").value);
+      var flag = g("lagflag");
+      if (lag === null) {
+        flag.className = "flag idle";
+        flag.innerHTML = "&mdash;";
+      } else {
+        lags.push(lag);
+        flag.className = "flag idle";
+        flag.textContent = lag + "m";
+      }
+    });
+
+    var rate = pct(referred, found);
+    el("dbi-found").textContent = found;
+    el("dbi-referred").textContent = referred;
+    el("dbi-rate").innerHTML = (rate === null) ? "&mdash;" : rate + "%";
+    el("dbi-lag").innerHTML = lags.length
+      ? (Math.min.apply(null, lags) === Math.max.apply(null, lags)
+          ? Math.min.apply(null, lags) + " min"
+          : Math.min.apply(null, lags) + "&ndash;" + Math.max.apply(null, lags) + " min")
+      : "&mdash;";
+
+    return { found: found, referred: referred, notReferred: notReferred, lags: lags };
+  }
+
+  function computeFunnel(dbi) {
     var r = num("fn-referrals"), e = num("fn-eligible"), b = num("fn-bd"),
         a = num("fn-approached"), c = num("fn-consented"), d = num("fn-donors");
 
@@ -1367,6 +1513,13 @@
       var p = pct(n, den);
       el(id).innerHTML = (p === null) ? "&nbsp;" : label + " " + p + "%";
     };
+
+    /* the two leading stages mirror the DBI log rather than taking typed input */
+    el("fn-dbi").textContent = dbi.found;
+    el("fn-dbiref").textContent = dbi.referred;
+    show("rate-dbiref", "ref.", dbi.referred, dbi.found);
+    show("rate-potential", "pot.", r, dbi.referred);
+
     show("rate-eligible", "elig.", e, r);
     show("rate-bd", "BD", b, e);
     show("rate-approached", "appr.", a, b);
@@ -1436,31 +1589,6 @@
     return s;
   }
 
-  /* map the Master's outcome vocabulary onto this sheet's picklist */
-  function mapOutcome(finalOutcome, bdDeclared, consent, organs) {
-    var f = String(finalOutcome || "").toLowerCase();
-    if (organs && String(organs).trim() && !/^(-|n\/?a|none)$/i.test(String(organs).trim())) {
-      return "Actual donor";
-    }
-    if (f.indexOf("donor") > -1) { return "Actual donor"; }
-    if (f.indexOf("dnr") > -1) { return "DNR"; }
-    if (f.indexOf("expired") > -1) { return "Expired"; }
-    if (f.indexOf("recovered") > -1) { return "Recovered"; }
-    if (f.indexOf("pending") > -1) { return "Pending"; }
-    if (isYes(bdDeclared)) { return "Brain death declared"; }
-    if (String(consent || "").toLowerCase().indexOf("refus") > -1) { return "Expired"; }
-    return "Monitoring";
-  }
-
-  function mapReason(consent, optedDnr, finalOutcome) {
-    var c = String(consent || "").toLowerCase();
-    if (c.indexOf("refus") > -1 || c.indexOf("no") === 0) { return "Family refusal"; }
-    if (isYes(optedDnr) || String(finalOutcome || "").toLowerCase().indexOf("dnr") > -1) {
-      return "DNR / family opted DNR";
-    }
-    return "";
-  }
-
   function status(msg, cls) {
     var box = el("imp-status");
     box.textContent = msg;
@@ -1475,139 +1603,196 @@
     if (!table) { status("Could not read that - paste the header row plus at least one case row.", "bad"); return; }
 
     var headers = table[0];
-    var iHrn   = colIndex(headers, "HRN");
-    var iCat   = colIndex(headers, "GCS CATEGORY");
-    if (iCat === -1) {
-      status("No 'GCS CATEGORY' column found. Include the header row from the Master tab.", "bad");
+    var iDate  = colIndex(headers, "DATE OF REFERRAL");
+    if (iDate === -1) {
+      status("No 'DATE OF REFERRAL' column found. Include the header row from the Master tab.", "bad");
       return;
     }
 
-    var iRoom  = colIndex(headers, "ROOM");
-    var iGcs   = colIndex(headers, "GCS UPON REFERRAL");
-    var iDate  = colIndex(headers, "DATE OF REFERRAL");
+    var iCat   = colIndex(headers, "GCS CATEGORY");
     var iFinal = colIndex(headers, "FINAL OUTCOME");
     var iBd    = colIndex(headers, "BRAIN DEATH DECLARED");
     var iAppr  = colIndex(headers, "FAMILY APPROACHED");
     var iCons  = colIndex(headers, "FAMILY CONSENT");
-    var iDnr   = colIndex(headers, "FAMILY OPTED DNR");
     var iOrg   = colIndex(headers, "ORGANS DONATED");
+    var iExp   = colIndex(headers, "EXPIRED");
 
-    var scope = document.querySelector("input[name=impscope]:checked").value;
     var sheetDate = el("f-date").value;
+    var range = weekRange(sheetDate);
+    var month = sheetDate ? sheetDate.slice(0, 7) : "";
 
     var cell = function (row, idx) { return (idx > -1 && row[idx] !== undefined) ? String(row[idx]).trim() : ""; };
 
-    var matched = [], skippedCat = 0, skippedDate = 0;
+    var iso = function (d) {
+      return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) +
+             "-" + ("0" + d.getDate()).slice(-2);
+    };
+    var weekStart = range ? iso(range.start) : "";
+    var weekEnd   = range ? iso(range.end) : "";
+
+    var blank = function () { return { total: 0, expired: 0, bd: 0, appr: 0, cons: 0, donors: 0 }; };
+    var week = blank(), mon = blank(), today = blank();
+    var parsed = 0, undated = 0;
 
     table.slice(1).forEach(function (row) {
       if (!row.join("").trim()) { return; }
-      if (normKey(cell(row, iCat)) !== "POTENTIAL") { skippedCat++; return; }
+      parsed++;
+
       var d = isoDate(cell(row, iDate));
-      if (scope === "date" && sheetDate && d && d !== sheetDate) { skippedDate++; return; }
-      matched.push({
-        hrn: cell(row, iHrn),
-        room: cell(row, iRoom),
-        gcs: (cell(row, iGcs).match(/\d+/) || [""])[0],
-        date: d,
-        bd: cell(row, iBd),
-        appr: cell(row, iAppr),
-        cons: cell(row, iCons),
-        dnr: cell(row, iDnr),
-        organs: cell(row, iOrg),
-        final: cell(row, iFinal)
-      });
-    });
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { undated++; return; }
 
-    if (!matched.length) {
-      var why = "No potential cases matched.";
-      if (skippedCat) { why += " " + skippedCat + " row(s) were a different GCS category."; }
-      if (skippedDate) { why += " " + skippedDate + " potential row(s) had a different referral date - switch to 'All potential cases' to include them."; }
-      status(why, "bad");
-      return;
-    }
+      var isDonor = (function () {
+        var o = cell(row, iOrg);
+        return (o && !/^(-|n\/?a|none)$/i.test(o)) ||
+               cell(row, iFinal).toLowerCase().indexOf("donor") > -1;
+      })();
 
-    /* grow the log if the day needs more than five rows */
-    buildReferrals(matched.length);
-
-    matched.forEach(function (m, i) {
-      var row = document.querySelector("[data-ref='" + i + "']");
-      if (!row) { return; }
-      var set = function (f, v) {
-        var c = row.querySelector("[data-f=" + f + "]");
-        if (c && v) { c.value = v; }
+      var add = function (b) {
+        b.total++;
+        if (/^yes/i.test(cell(row, iExp))) { b.expired++; }
+        if (isYes(cell(row, iBd)))   { b.bd++; }
+        if (isYes(cell(row, iAppr))) { b.appr++; }
+        if (isYes(cell(row, iCons))) { b.cons++; }
+        if (isDonor) { b.donors++; }
       };
-      set("id", m.hrn);
-      set("room", m.room);
-      set("gcs", m.gcs);
-      set("outcome", mapOutcome(m.final, m.bd, m.cons, m.organs));
-      set("reason", mapReason(m.cons, m.dnr, m.final));
+
+      if (weekStart && d >= weekStart && d <= weekEnd) { add(week); }
+      if (month && d.slice(0, 7) === month) { add(mon); }
+      /* the funnel stays a daily, POTENTIAL-only count */
+      if (sheetDate && d === sheetDate && normKey(cell(row, iCat)) === "POTENTIAL") { add(today); }
     });
 
-    /* funnel counts derived from the same matched set */
-    var count = function (fn) { return matched.filter(fn).length; };
-    el("fn-referrals").value = matched.length;
-    el("fn-bd").value        = count(function (m) { return isYes(m.bd); });
-    el("fn-approached").value = count(function (m) { return isYes(m.appr); });
-    el("fn-consented").value  = count(function (m) { return isYes(m.cons); });
-    el("fn-donors").value     = count(function (m) {
-      return (m.organs && !/^(-|n\/?a|none)$/i.test(m.organs)) ||
-             String(m.final).toLowerCase().indexOf("donor") > -1;
+    if (!parsed) { status("No data rows found under that header.", "bad"); return; }
+
+    var fill = function (key, period, v) {
+      var r = document.querySelector("[data-wm='" + key + "']");
+      if (r) { r.querySelector("[data-p=" + period + "]").value = v; }
+    };
+    ["total", "expired", "bd", "appr", "cons", "donors"].forEach(function (k) {
+      fill(k, "week", week[k]);
+      fill(k, "month", mon[k]);
     });
-    /* 'escalated to eligible' cannot be derived here: once a case is re-graded
-       Eligible in the Master it no longer matches a potential-only import. */
+
+    /* daily funnel, POTENTIAL only - 'escalated to eligible' cannot be derived,
+       since a case re-graded Eligible no longer matches a potential-only filter */
+    el("fn-referrals").value  = today.total;
+    el("fn-bd").value         = today.bd;
+    el("fn-approached").value = today.appr;
+    el("fn-consented").value  = today.cons;
+    el("fn-donors").value     = today.donors;
 
     compute();
 
-    var note = "Imported " + matched.length + " potential case" + (matched.length === 1 ? "" : "s") +
-               ". Names discarded; HRN kept.";
-    if (skippedCat) { note += " Skipped " + skippedCat + " non-potential row(s)."; }
-    if (skippedDate) { note += " Skipped " + skippedDate + " on other dates."; }
-    note += " Still to enter by hand: the acknowledgement and response clocks, and any escalation to eligible.";
+    var note = "Read " + parsed + " row" + (parsed === 1 ? "" : "s") + ". Week to date: " +
+               week.total + " referred, " + week.cons + " consent" + (week.cons === 1 ? "" : "s") +
+               ". Month to date: " + mon.total + " referred, " + mon.cons +
+               " consent" + (mon.cons === 1 ? "" : "s") + ". Daily funnel: " + today.total +
+               " potential case" + (today.total === 1 ? "" : "s") + " dated " + (sheetDate || "-") + ".";
+    if (undated) {
+      note += " " + undated + " row(s) had an unreadable referral date and were left out of every total.";
+    }
+    note += " Names discarded on read.";
     status(note, "good");
   }
 
   /* ---------- narrative ---------- */
 
-  function narrateReferrals() {
-    var out = [];
-    Array.prototype.forEach.call(document.querySelectorAll("[data-ref]"), function (row) {
-      var g = function (f) { return row.querySelector("[data-f=" + f + "]"); };
+  function narrateDbi() {
+    var rows = [], units = {}, found = 0, referred = 0, notRef = 0, lags = [];
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-dbi]"), function (row) {
+      var g = function (f) { return row.querySelector("[data-d=" + f + "]"); };
       var id = g("id").value.trim();
-      var recv = g("recv").value;
-      if (!id && !recv) { return; }
+      var foundAt = g("found").value;
+      if (!id && !foundAt) { return; }
 
-      var s = "Potential donor " + (id || "unidentified");
-      var room = g("room").value.trim();
-      var gcs = g("gcs").value.trim();
+      found++;
+      var unit = g("unit").value;
+      if (unit) { units[unit] = (units[unit] || 0) + 1; }
+
+      var state = g("ref").value;
+      if (state === "Yes") { referred++; }
+      if (state === "No")  { notRef++; }
+
+      var lag = delta(foundAt, g("reftime").value);
+      if (lag !== null) { lags.push(lag); }
+
+      var s = "DBI case " + (id || "unidentified");
       var bits = [];
-      if (room) { bits.push(room); }
-      if (gcs) { bits.push("GCS " + gcs); }
+      if (unit) { bits.push(unit); }
+      if (g("gcs").value.trim()) { bits.push("GCS " + g("gcs").value.trim()); }
       if (bits.length) { s += " (" + bits.join(", ") + ")"; }
+      if (foundAt) { s += " identified at " + foundAt; }
 
-      var clauses = [];
-      if (recv) { clauses.push("referral received at " + recv); }
-
-      var dAck = delta(recv, g("ack").value);
-      if (dAck !== null) {
-        clauses.push("acknowledged at " + g("ack").value + " (" + dAck + " min, " +
-          (dAck <= ACK_SLA ? "within" : "exceeding") + " the 10-minute target)");
+      if (state === "Yes") {
+        s += g("reftime").value
+          ? " and referred to SHARE at " + g("reftime").value
+          : " and referred to SHARE";
+        if (lag !== null) {
+          s += ", a referral lag of " + lag + " minute" + (lag === 1 ? "" : "s");
+        }
+      } else if (state === "No") {
+        s += " was not referred";
+        if (g("noref").value) {
+          s += "; reason recorded as " + softLower(g("noref").value);
+        }
+      } else if (state === "Pending") {
+        s += ", referral still pending";
       }
-      var dResp = delta(recv, g("resp").value);
-      if (dResp !== null) {
-        clauses.push("coordinator responded at " + g("resp").value + " (" + dResp + " min, " +
-          (dResp <= RESP_SLA ? "within" : "exceeding") + " the 60-minute target)");
-      }
-      if (clauses.length) { s += ": " + clauses.join("; "); }
       s += ".";
 
-      var outcome = g("outcome").value;
-      var reason = g("reason").value;
-      if (outcome) {
-        s += " Outcome: " + outcome.toLowerCase() + ".";
-        if (reason) { s += " Non-conversion reason recorded as " + reason.toLowerCase() + "."; }
+      if (g("outcome").value) {
+        s += " Outcome recorded as " + softLower(g("outcome").value) + ".";
       }
+      rows.push(s);
+    });
+
+    if (!found) { return ""; }
+
+    var lead = found + " patient" + (found === 1 ? "" : "s") + " meeting DBI criteria " +
+               (found === 1 ? "was" : "were") + " identified under ER and ICU monitoring";
+    var unitBits = Object.keys(units).map(function (u) { return units[u] + " in " + u; });
+    if (unitBits.length) { lead += " &mdash; " + listPhrase(unitBits); }
+    lead += ".";
+
+    lead += " " + referred + " referred to SHARE, a referral rate of " +
+            pct(referred, found) + "%";
+    if (lags.length) {
+      var lo = Math.min.apply(null, lags), hi = Math.max.apply(null, lags);
+      lead += ", with referral lag " + (lo === hi
+        ? "of " + lo + " minute" + (lo === 1 ? "" : "s")
+        : "ranging from " + lo + " to " + hi + " minutes");
+    }
+    lead += ".";
+    if (notRef) {
+      lead += " " + notRef + " case" + (notRef === 1 ? " was" : "s were") + " not referred.";
+    }
+
+    return sentences([lead].concat(rows));
+  }
+
+  function narrateWm(wm) {
+    var out = [];
+
+    ["week", "month"].forEach(function (p) {
+      var v = wm[p];
+      if (!(v.total || v.expired || v.bd || v.appr || v.cons || v.donors)) { return; }
+
+      var label = (p === "week") ? "week to date" : "month to date";
+      var s = "For the " + label + ", the POMD Referral Master records " + v.total +
+              " patient" + (v.total === 1 ? "" : "s") + " referred";
+      var bits = [];
+      if (v.expired) { bits.push(v.expired + " expired"); }
+      if (v.bd) { bits.push(v.bd + " with brain death declared"); }
+      if (v.appr) { bits.push(v.appr + " famil" + (v.appr === 1 ? "y" : "ies") + " approached"); }
+      if (v.cons) { bits.push(v.cons + " consent" + (v.cons === 1 ? "" : "s") + " obtained"); }
+      if (v.donors) { bits.push(v.donors + " actual donor" + (v.donors === 1 ? "" : "s")); }
+      if (bits.length) { s += ", of which " + listPhrase(bits); }
+      s += ".";
+      if (v.rate !== null) { s += " Consent rate " + v.rate + "%."; }
       out.push(s);
     });
+
     return out;
   }
 
@@ -1637,7 +1822,7 @@
       if (!served) { return; }
       var within = parseFloat(row.querySelector("[data-cc=within]").value);
       var hces = parseFloat(row.querySelector("[data-cc=hces]").value);
-      var name = CHARTER[i][0].toLowerCase();
+      var name = softLower(CHARTER[i][0]);
       var s = "Served " + served + " client" + (served === 1 ? "" : "s") + " for " + name +
               " (charter time " + CHARTER[i][1] + ")";
       if (!isNaN(within)) {
@@ -1654,7 +1839,7 @@
   function narrateActivities() {
     var role = document.querySelector("input[name=role]:checked").value;
     var rows = ACTIVITIES[role];
-    var out = [];
+    var out = [], total = 0;
     Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
       var i = parseInt(row.getAttribute("data-act"), 10);
       var c = parseFloat(row.querySelector("[data-f=count]").value);
@@ -1664,22 +1849,28 @@
         return;
       }
       var std = parseFloat(row.querySelector("[data-std]").getAttribute("data-std"));
-      var label = rows[i][0].replace(/&amp;/g, "&").replace(/&mdash;/g, "-");
+      var label = softLower(rows[i][0].replace(/&amp;/g, "&").replace(/&mdash;/g, "-"));
       var status = row.querySelector("[data-f=status]").value;
-      var s = "Logged " + c + " x " + label.toLowerCase() +
-              " at " + std + " standard min each, " + (std * c) + " min total" +
-              (status ? " (" + status.toLowerCase() + ")" : "") + ".";
+      var sub = std * c;
+      total += sub;
+      var s = (c === 1)
+        ? "Logged 1 instance of " + label + " at its standard " + std + " minute" +
+          (std === 1 ? "" : "s") + (status ? ", recorded as " + status.toLowerCase() : "") + "."
+        : "Logged " + c + " instances of " + label + " at a standard " + std + " minute" +
+          (std === 1 ? "" : "s") + " each, " + sub + " minutes in total" +
+          (status ? ", recorded as " + status.toLowerCase() : "") + ".";
       if (holder) {
         holder.hidden = false;
         holder.querySelector(".narr").textContent = s;
       }
       out.push(s);
     });
-    return out;
+    return { items: out, total: total };
   }
 
   function narrateChecklists() {
-    var admin = [], routine = [];
+    var admin = [];
+    var groups = { Completed: [], Ongoing: [], Pending: [], Deferred: [], Cancelled: [] };
 
     Array.prototype.forEach.call(document.querySelectorAll("[data-admin]"), function (chk) {
       var i = parseInt(chk.getAttribute("data-admin"), 10);
@@ -1696,46 +1887,106 @@
         holder.hidden = !s;
         holder.textContent = s;
       }
-      if (s) { routine.push(s); }
+      if (groups[sel.value]) { groups[sel.value].push(ROUTINE_PHRASE[i]); }
     });
 
-    return { admin: admin, routine: routine };
+    return { admin: admin, routine: groups };
   }
 
-  function block(title, items) {
-    if (!items || !items.length) { return ""; }
-    return "<h3>" + title + "</h3><ul>" +
-      items.map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
+  /* the 16 routine items collapse by status so the paragraph reads as prose,
+     not as sixteen near-identical sentences */
+  function routineProse(g) {
+    var out = [];
+    var many = function (list) { return list.length !== 1; };
+
+    if (g.Completed.length) {
+      out.push("Completed " + listPhrase(g.Completed) + ".");
+    }
+    if (g.Ongoing.length) {
+      out.push(capFirst(listPhrase(g.Ongoing)) + (many(g.Ongoing) ? " are" : " is") +
+               " ongoing and carr" + (many(g.Ongoing) ? "y" : "ies") + " over to the next shift.");
+    }
+    if (g.Pending.length) {
+      out.push(capFirst(listPhrase(g.Pending)) + (many(g.Pending) ? " remain" : " remains") +
+               " pending and ha" + (many(g.Pending) ? "ve" : "s") + " not been started.");
+    }
+    if (g.Deferred.length) {
+      out.push(capFirst(listPhrase(g.Deferred)) + (many(g.Deferred) ? " were" : " was") +
+               " deferred to a later date.");
+    }
+    if (g.Cancelled.length) {
+      out.push(capFirst(listPhrase(g.Cancelled)) + (many(g.Cancelled) ? " were" : " was") +
+               " cancelled for the day.");
+    }
+    return sentences(out);
   }
 
   function renderNarrative() {
-    var lists = narrateChecklists();
-    var refs = narrateReferrals();
-    var funnel = narrateFunnel();
+    var lists   = narrateChecklists();
+    var refs    = narrateWm(computeWm());
+    var funnel  = narrateFunnel();
     var charter = narrateCharter();
-    var acts = narrateActivities();
-    var others = el("f-others").value.trim();
+    var acts    = narrateActivities();
+    var others  = el("f-others").value.trim();
 
-    var name = el("f-name").value.trim();
-    var date = el("f-date").value;
-    var role = document.querySelector("input[name=role]:checked").value.replace("_", "/");
+    var name    = el("f-name").value.trim();
+    var date    = el("f-date").value;
+    var roleKey = document.querySelector("input[name=role]:checked").value;
+    var role    = ROLE_LABEL[roleKey] || roleKey.replace("_", "/");
 
+    /* --- opening: who, in what role, on which day, against what schedule --- */
     var html = "";
     if (date || name) {
-      html += "<p><strong>" + (name || "Transplant coordinator") + "</strong> &mdash; " +
-              role + (date ? ", " + date : "") + ".</p>";
+      var tags = dayContext(date);
+      var ctx = (tags && tags.length)
+        ? tags.join(", ").replace(/&mdash;/g, "-").toLowerCase()
+        : "no fixed unit activity scheduled";
+      html += "<p><strong>" + esc(name || "The transplant coordinator") + "</strong>, " +
+              role + ", on duty" + (date ? " on " + date : "") +
+              " for the 07:00&ndash;15:00 charter shift of " + SHIFT_MIN + " minutes. " +
+              "Scheduled context for the day: " + ctx + ".</p>";
     }
 
-    html += block("Potential organ donors", refs);
-    if (funnel) { html += "<h3>Funnel summary</h3><p>" + funnel + "</p>"; }
-    html += block("Citizen&#39;s Charter services", charter);
-    html += block("Daily routine", lists.routine);
-    html += block("Administration, coordination &amp; outreach", lists.admin);
-    html += block("Activity &amp; time log", acts);
-    if (others) { html += "<h3>Other activities</h3><p>" + others.replace(/</g, "&lt;") + "</p>"; }
+    /* --- DBI detection pool, above referral --- */
+    var dbiText = narrateDbi();
+    html += para("Devastating brain injury monitoring", dbiText);
 
-    if (!refs.length && !funnel && !charter.length && !lists.routine.length &&
-        !lists.admin.length && !acts.length && !others) {
+    /* --- weekly and monthly position from the Master --- */
+    html += para("Weekly &amp; monthly update", sentences(refs));
+
+    /* --- funnel --- */
+    html += para("Funnel summary", funnel);
+
+    /* --- charter --- */
+    var ccLead = charter.length
+      ? "Citizen&#39;s Charter services were delivered against the published OTSU charter times."
+      : "";
+    html += para("Citizen&#39;s Charter services", sentences([ccLead].concat(charter)));
+
+    /* --- routine and admin --- */
+    var routineText = routineProse(lists.routine);
+    html += para("Daily routine", routineText);
+    html += para("Administration, coordination &amp; outreach", sentences(lists.admin));
+
+    /* --- activity and time log, with the shift arithmetic spelled out --- */
+    var actText = "";
+    if (acts.items.length) {
+      actText = sentences(["Time was logged against the " + roleKey.replace("_", "/") +
+                           " standard-minute schedule (TC Activities/Services)."].concat(acts.items));
+      actText += " Productive time for the shift totals " + acts.total + " minute" +
+                 (acts.total === 1 ? "" : "s") + " against the " + SHIFT_MIN +
+                 "-minute charter shift, a workload index of " +
+                 (acts.total / SHIFT_MIN).toFixed(2) + ".";
+    }
+    html += para("Activity &amp; time log", actText);
+
+    /* --- free text, kept verbatim --- */
+    if (others) {
+      html += para("Other activities", esc(others).replace(/\n/g, "<br>"));
+    }
+
+    if (!dbiText && !refs.length && !funnel && !charter.length && !routineText &&
+        !lists.admin.length && !acts.items.length && !others) {
       html = "<p class='empty'>Nothing logged yet. Tick a task, set a status, or enter a count and its narrative appears here automatically.</p>";
     }
 
@@ -1743,23 +1994,25 @@
   }
 
   function compute() {
-    var ref = computeReferrals();
     var mins = computeActivities();
     var routine = computeRoutine();
-    var funnelRefs = computeFunnel();
+    var dbi = computeDbi();
+    var funnelRefs = computeFunnel(dbi);
+    computeWm();
+    renderPeriod();
 
-    /* SLA */
-    if (!ref.clocks) {
-      setKpi("kpi-sla", "idle", "&mdash;", ref.logged ? "times not yet entered" : "no referrals logged");
+    /* referral rate - DBI identified that reached SHARE */
+    if (!dbi.found) {
+      setKpi("kpi-sla", "idle", "&mdash;", "no DBI cases logged");
     } else {
-      var p = Math.round((ref.met / ref.clocks) * 100);
+      var p = Math.round((dbi.referred / dbi.found) * 100);
       var state = p === 100 ? "ok" : (p >= 80 ? "warn" : "crit");
       setKpi("kpi-sla", state, p + "<span class='unit'>%</span>",
-             ref.met + " of " + ref.clocks + " clocks met");
+             dbi.referred + " of " + dbi.found + " DBI referred");
     }
 
     /* referrals */
-    var refCount = Math.max(funnelRefs, ref.logged);
+    var refCount = funnelRefs;
     var refState = refCount === 0 ? "idle" : (refCount >= REF_BASE ? "ok" : "warn");
     setKpi("kpi-ref", refState, String(refCount), "25 potential in 2026 YTD");
 
@@ -1791,7 +2044,7 @@
   }
 
   function collect() {
-    var data = { fields: {}, refs: [], acts: [], routine: [], admin: [], charter: [] };
+    var data = { fields: {}, wm: {}, dbi: [], acts: [], routine: [], admin: [], charter: [] };
 
     ["f-date", "f-name", "f-others", "fn-referrals", "fn-eligible", "fn-bd",
      "fn-approached", "fn-consented", "fn-donors"].forEach(function (id) {
@@ -1799,12 +2052,17 @@
     });
     data.fields.role = document.querySelector("input[name=role]:checked").value;
 
-    Array.prototype.forEach.call(document.querySelectorAll("[data-ref]"), function (row) {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-wm] input"), function (c) {
+      var key = c.closest("[data-wm]").getAttribute("data-wm");
+      data.wm[key + ":" + c.getAttribute("data-p")] = c.value;
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-dbi]"), function (row) {
       var o = {};
       Array.prototype.forEach.call(row.querySelectorAll("input,select"), function (c) {
-        o[c.getAttribute("data-f")] = c.value;
+        o[c.getAttribute("data-d")] = c.value;
       });
-      data.refs.push(o);
+      data.dbi.push(o);
     });
 
     Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
@@ -1842,14 +2100,22 @@
       if (r) { r.checked = true; buildActivities(); }
     }
 
-    if ((data.refs || []).length > document.querySelectorAll("[data-ref]").length) {
-      buildReferrals(data.refs.length);
+    Object.keys(data.wm || {}).forEach(function (k) {
+      var parts = k.split(":");
+      var row = document.querySelector("[data-wm='" + parts[0] + "']");
+      if (!row) { return; }
+      var c = row.querySelector("[data-p=" + parts[1] + "]");
+      if (c) { c.value = data.wm[k]; }
+    });
+
+    if ((data.dbi || []).length > document.querySelectorAll("[data-dbi]").length) {
+      buildDbi(data.dbi.length);
     }
-    (data.refs || []).forEach(function (o, i) {
-      var row = document.querySelector("[data-ref='" + i + "']");
+    (data.dbi || []).forEach(function (o, i) {
+      var row = document.querySelector("[data-dbi='" + i + "']");
       if (!row) { return; }
       Object.keys(o).forEach(function (f) {
-        var c = row.querySelector("[data-f=" + f + "]");
+        var c = row.querySelector("[data-d=" + f + "]");
         if (c && c.tagName !== "SPAN") { c.value = o[f]; }
       });
     });
@@ -1907,7 +2173,8 @@
 
   /* ---------- wire up ---------- */
 
-  buildReferrals();
+  buildWm();
+  buildDbi();
   buildCharter();
   buildRoutine();
   buildAdmin();
