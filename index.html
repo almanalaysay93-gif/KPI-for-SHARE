@@ -986,13 +986,8 @@
 
   /* while Ongoing, all four are in the same real phase - state it once rather
      than the generic "is ongoing and carries over to the next day" line */
-  function researchPrepSentence(names) {
-    if (!names.length) { return ""; }
-    var subj = listPhrase(names) + " research project" + (names.length === 1 ? "" : "s");
-    var verb = names.length === 1 ? "remains" : "remain";
-    return "The " + subj + " " + verb + " in the preparation phase: compliance of documents and " +
-           "requirements, extensive planning and coordination, and development of the tools each " +
-           "study will use.";
+  function researchPrepSentence(name) {
+    return name + " is still being prepared: papers, planning, and the tools the study will use.";
   }
 
   var CHARTER = [
@@ -1075,6 +1070,17 @@
   function para(title, text) {
     if (!text) { return ""; }
     return "<h3>" + title + "</h3><p>" + text + "</p>";
+  }
+
+  /* plain hours-and-minutes wording instead of a raw minute count once it
+     passes an hour, e.g. 90 -> "1 hour and 30 minutes" */
+  function formatDuration(mins) {
+    mins = Math.round(mins);
+    if (mins < 60) { return mins + " minute" + (mins === 1 ? "" : "s"); }
+    var h = Math.floor(mins / 60), m = mins % 60;
+    var hPart = h + " hour" + (h === 1 ? "" : "s");
+    if (!m) { return hPart; }
+    return hPart + " and " + m + " minute" + (m === 1 ? "" : "s");
   }
 
   /* ---------- build the DOM ---------- */
@@ -1587,7 +1593,7 @@
       var isPrep = research && sel.value === "Ongoing";
 
       var statusSentence = isPrep
-        ? researchPrepSentence([research])
+        ? researchPrepSentence(research + " research project")
         : routineSentence(ROUTINE_PHRASE[i], sel.value);
 
       var row = sel.closest("tr");
@@ -1597,9 +1603,8 @@
       if (!isNaN(std) && !isNaN(c) && c > 0) {
         var sub = std * c;
         countSentence = (c === 1)
-          ? "Logged 1 instance at its standard " + std + " minute" + (std === 1 ? "" : "s") + "."
-          : "Logged " + c + " instances at a standard " + std + " minute" + (std === 1 ? "" : "s") +
-            " each, " + sub + " minutes in total.";
+          ? "Logged 1 time, " + formatDuration(std) + "."
+          : "Logged " + c + " times, " + formatDuration(std) + " each, " + formatDuration(sub) + " total.";
       }
       var combined = sentences([statusSentence, countSentence]);
 
@@ -1670,7 +1675,7 @@
         : "no fixed unit activity scheduled";
       html += "<p><strong>" + esc(name || "The transplant coordinator") + "</strong>, " +
               role + ", on duty" + (date ? " on " + date : "") +
-              " for the 7:00 AM&ndash;3:00 PM charter shift of " + SHIFT_MIN + " minutes. " +
+              " for the 7:00 AM&ndash;3:00 PM charter shift (" + formatDuration(SHIFT_MIN) + "). " +
               "Scheduled context for the day: " + ctx + ".</p>";
     }
 
@@ -1697,19 +1702,17 @@
     if (rm || cm) {
       var minBits = [];
       if (rm) {
-        minBits.push("Daily routine tasks logged " + rm + " minute" + (rm === 1 ? "" : "s") +
-                     " of productive time.");
+        minBits.push("Daily routine work took " + formatDuration(rm) + ".");
       }
       if (cm) {
-        minBits.push("Citizen&#39;s Charter services (above) contributed a further " + cm +
-                     " minute" + (cm === 1 ? "" : "s") + ".");
+        minBits.push("Citizen&#39;s Charter services (above) added " + formatDuration(cm) + " more.");
       }
       var grandTotal = rm + cm;
+      var shiftHours = SHIFT_MIN / 60;
+      var shiftAdj = (shiftHours % 1 === 0) ? shiftHours + "-hour" : formatDuration(SHIFT_MIN);
       routineText = sentences([routineText].concat(minBits));
-      routineText += " Productive time for the shift totals " + grandTotal + " minute" +
-                     (grandTotal === 1 ? "" : "s") + " against the " + SHIFT_MIN +
-                     "-minute charter shift, a workload index of " +
-                     (grandTotal / SHIFT_MIN).toFixed(2) + ".";
+      routineText += " In total, " + formatDuration(grandTotal) + " of the " + shiftAdj +
+                     " shift &mdash; a workload index of " + (grandTotal / SHIFT_MIN).toFixed(2) + ".";
     }
     html += para("Daily routine", routineText);
     html += para("Administration, coordination &amp; outreach", sentences(lists.admin));
