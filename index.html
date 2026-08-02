@@ -1,0 +1,1974 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Printable daily KPI and activity monitoring sheet for the SHARE transplant coordinator, SPMC Organ Transplant Services Unit.">
+<title>SHARE TC Daily KPI Dashboard</title>
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style>
+</head>
+<body>
+<style>
+  :root {
+    color-scheme: light;
+    --paper:#ffffff;
+    --band:#f2f6f7;
+    --ink:#14181c;
+    --ink-2:#4a5560;
+    --ink-3:#75828e;
+    --rule:#d3dae0;
+    --rule-strong:#9dabb6;
+    --accent:#0f6b5c;
+    --accent-soft:#e4f1ed;
+    --ok:#14724f;
+    --warn:#8a5806;
+    --crit:#a3232a;
+    --field:#fbfdfd;
+
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --paper:#11151a;
+      --band:#171f26;
+      --ink:#e9eef2;
+      --ink-2:#a7b3be;
+      --ink-3:#7e8b97;
+      --rule:#28313a;
+      --rule-strong:#44515c;
+      --accent:#4ec2a8;
+      --accent-soft:#123029;
+      --ok:#4dbd8d;
+      --warn:#d5a343;
+      --crit:#e3696f;
+      --field:#161d24;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper:#11151a;
+    --band:#171f26;
+    --ink:#e9eef2;
+    --ink-2:#a7b3be;
+    --ink-3:#7e8b97;
+    --rule:#28313a;
+    --rule-strong:#44515c;
+    --accent:#4ec2a8;
+    --accent-soft:#123029;
+    --ok:#4dbd8d;
+    --warn:#d5a343;
+    --crit:#e3696f;
+    --field:#161d24;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --paper:#ffffff;
+    --band:#f2f6f7;
+    --ink:#14181c;
+    --ink-2:#4a5560;
+    --ink-3:#75828e;
+    --rule:#d3dae0;
+    --rule-strong:#9dabb6;
+    --accent:#0f6b5c;
+    --accent-soft:#e4f1ed;
+    --ok:#14724f;
+    --warn:#8a5806;
+    --crit:#a3232a;
+    --field:#fbfdfd;
+  }
+
+  body {
+    background: var(--band);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.45;
+    margin: 0;
+    padding: 24px 16px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- toolbar ---------- */
+  .toolbar {
+    max-width: 8.5in;
+    margin: 0 auto 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .toolbar .spacer { flex: 1 1 auto; }
+  .btn {
+    font: 600 11px/1 var(--sans);
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    padding: 9px 13px;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary { color: var(--paper); }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .btn-primary { color: #fff; } }
+  .btn-primary:hover { filter: brightness(1.08); color: #fff; }
+  .saved-note {
+    font: 500 11px/1 var(--mono);
+    color: var(--ink-3);
+    letter-spacing: .02em;
+  }
+
+  /* ---------- POMD import panel ---------- */
+  .importer {
+    max-width: 8.5in;
+    margin: 0 auto 16px;
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    padding: 12px 14px 13px;
+  }
+  .importer summary {
+    font: 700 10px/1 var(--sans);
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    cursor: pointer;
+    list-style: none;
+  }
+  .importer summary::-webkit-details-marker { display: none; }
+  .importer summary::before { content: "\25B8  "; }
+  .importer[open] summary::before { content: "\25BE  "; }
+  .importer .how {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin: 9px 0 8px;
+  }
+  .importer .how code {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    background: var(--band);
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+  .importer textarea {
+    min-height: 84px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .imp-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-top: 9px;
+  }
+  .imp-controls .opt {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .imp-controls input[type="radio"] { accent-color: var(--accent); margin: 0; }
+  .imp-status {
+    font: 500 11px/1.45 var(--mono);
+    color: var(--ink-3);
+    margin-top: 9px;
+    min-height: 15px;
+  }
+  .imp-status.good { color: var(--ok); }
+  .imp-status.bad { color: var(--crit); }
+  .imp-privacy {
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: var(--ink-3);
+    border-left: 2px solid var(--rule-strong);
+    padding-left: 8px;
+    margin-top: 10px;
+  }
+
+  /* ---------- the sheet ---------- */
+  .sheet {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto 22px;
+    padding: 0.45in 0.5in 0.5in;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 12px 32px rgba(10,20,30,.09);
+    box-sizing: border-box;
+  }
+
+  /* ---------- letterhead ---------- */
+  .letterhead {
+    text-align: center;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 7px;
+  }
+  .letterhead .rep {
+    font-family: var(--serif);
+    font-size: 10.5px;
+    line-height: 1.35;
+    color: var(--ink-2);
+    margin: 0;
+  }
+  .letterhead .org {
+    font-family: var(--serif);
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    margin: 1px 0 0;
+  }
+  .letterhead .unit {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .19em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 4px 0 0;
+  }
+
+  .doctitle {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--rule);
+    padding: 7px 0 8px;
+  }
+  .doctitle h1 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .015em;
+    margin: 0;
+  }
+  .doctitle .meta {
+    font: 500 9.5px/1.3 var(--mono);
+    color: var(--ink-3);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* ---------- identity strip ---------- */
+  .identity {
+    display: grid;
+    grid-template-columns: 1.15fr 1.5fr 1.35fr 1.5fr;
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .idcell { padding: 8px 12px 9px 0; }
+  .idcell + .idcell { padding-left: 12px; border-left: 1px solid var(--rule); }
+
+  .lbl {
+    display: block;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+
+  input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 4px 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  input[type="time"], input[type="number"], input[type="date"] {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+    border-color: var(--accent);
+  }
+  input[type="number"] { text-align: center; -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .roleset { display: flex; gap: 0; border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; }
+  .roleset label {
+    flex: 1 1 0;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-align: center;
+    padding: 5px 2px;
+    cursor: pointer;
+    background: var(--field);
+    color: var(--ink-2);
+    border-right: 1px solid var(--rule);
+  }
+  .roleset label:last-child { border-right: 0; }
+  .roleset input { position: absolute; opacity: 0; pointer-events: none; }
+  .roleset input:checked + span { color: var(--accent); }
+  .roleset label:has(input:checked) { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .roleset label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .daycontext {
+    font: 600 10px/1.35 var(--sans);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--accent);
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .daycontext .tag {
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 1px 5px;
+    background: var(--accent-soft);
+  }
+  .daycontext .none { color: var(--ink-3); border-color: var(--rule); background: transparent; }
+
+  /* ---------- section headers ---------- */
+  .sec { margin-top: 13px; }
+  .sechead {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 3px;
+    margin-bottom: 7px;
+  }
+  .sechead h2 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .sechead .src {
+    font: 400 8.5px/1 var(--mono);
+    color: var(--ink-3);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ---------- KPI band ---------- */
+  .kpiband {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--rule-strong);
+  }
+  .kpi { padding: 8px 10px 9px; border-right: 1px solid var(--rule); }
+  .kpi:last-child { border-right: 0; }
+  .kpi .k-lbl {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .kpi .k-val {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 25px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    margin-top: 3px;
+  }
+  .kpi .k-val .unit { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 1px; }
+  .kpi .k-sub {
+    font: 500 9px/1.3 var(--mono);
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .kpi[data-state="ok"] .k-val { color: var(--ok); }
+  .kpi[data-state="warn"] .k-val { color: var(--warn); }
+  .kpi[data-state="crit"] .k-val { color: var(--crit); }
+  .kpi[data-state="crit"] { box-shadow: inset 3px 0 0 var(--crit); }
+  .kpi[data-state="warn"] { box-shadow: inset 3px 0 0 var(--warn); }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-align: left;
+    padding: 0 4px 4px;
+    border-bottom: 1px solid var(--rule-strong);
+    vertical-align: bottom;
+  }
+  td {
+    padding: 3px 4px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+    font-size: 12px;
+  }
+  td.num, th.num { text-align: center; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .flag {
+    display: inline-block;
+    font: 700 8.5px/1.5 var(--mono);
+    letter-spacing: .06em;
+    padding: 0 5px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+    min-width: 34px;
+    text-align: center;
+  }
+  .flag.ok { color: var(--ok); }
+  .flag.bad { color: var(--crit); }
+  .flag.idle { color: var(--ink-3); border-color: var(--rule); }
+
+  /* ---------- funnel ---------- */
+  .funnel {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    border: 1px solid var(--rule-strong);
+  }
+  .funnote {
+    font: 400 9px/1.45 var(--mono);
+    color: var(--ink-3);
+    margin: 4px 0 0;
+  }
+  .fstage { padding: 7px 8px 8px; border-right: 1px solid var(--rule); text-align: center; }
+  .fstage:last-child { border-right: 0; }
+  .fstage .f-lbl {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    min-height: 22px;
+    display: block;
+  }
+  .fstage input { width: 54px; margin: 3px auto 0; text-align: center; font-size: 15px; padding: 3px 2px; }
+  .fstage .f-rate {
+    font: 600 9.5px/1.4 var(--mono);
+    color: var(--accent);
+    margin-top: 3px;
+    min-height: 13px;
+  }
+
+  /* ---------- routine grid ---------- */
+  .routine { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+  .rrow {
+    display: grid;
+    grid-template-columns: 15px 1fr auto;
+    align-items: center;
+    gap: 5px;
+    padding: 2.5px 0;
+    border-bottom: 1px dotted var(--rule);
+    font-size: 11.5px;
+  }
+  .rrow .rnum { font: 500 8.5px/1 var(--mono); color: var(--ink-3); }
+  .status {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    padding: 1px 3px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--field);
+    color: var(--ink-3);
+    width: 82px;
+  }
+  .status[data-s="Completed"] { color: var(--ok); border-color: var(--ok); }
+  .status[data-s="Ongoing"]   { color: var(--accent); border-color: var(--accent); }
+  .status[data-s="Pending"]   { color: var(--warn); border-color: var(--warn); }
+  .status[data-s="Deferred"]  { color: var(--ink-2); border-color: var(--rule-strong); }
+  .status[data-s="Cancelled"] { color: var(--crit); border-color: var(--crit); }
+
+  /* ---------- checkbox lists ---------- */
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+  .chk {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 2.5px 0;
+    font-size: 11.5px;
+    line-height: 1.3;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .chk input[type="checkbox"] {
+    width: 12px; height: 12px;
+    margin: 2px 0 0;
+    accent-color: var(--accent);
+    flex: 0 0 auto;
+  }
+  .chk .sub { display: block; color: var(--ink-3); font-size: 9.5px; }
+
+  /* ---------- auto-narrative ---------- */
+  .narr {
+    font-size: 10px;
+    line-height: 1.45;
+    color: var(--ink-2);
+    border-left: 2px solid var(--accent);
+    padding: 2px 0 3px 7px;
+    margin: 2px 0 5px 18px;
+  }
+  .narr[hidden] { display: none; }
+  tr.narr-row[hidden] { display: none; }
+  tr.narr-row td { padding: 0; }
+
+  .narrative {
+    border: 1px solid var(--rule-strong);
+    padding: 9px 11px 11px;
+    font-size: 11px;
+    line-height: 1.55;
+  }
+  .narrative h3 {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 9px 0 3px;
+  }
+  .narrative h3:first-child { margin-top: 0; }
+  .narrative p { margin: 0 0 4px; }
+  .narrative .empty { color: var(--ink-3); font-style: italic; }
+  .narrative ul { margin: 0; padding-left: 15px; }
+  .narrative li { margin-bottom: 2px; }
+  #btn-copy { margin-top: 8px; }
+
+  /* ---------- activity log ---------- */
+  .actgroup {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 4px;
+  }
+  .act-count { width: 46px; }
+  .act-sub { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--ink-2); }
+  tr.total td {
+    border-top: 1.5px solid var(--ink);
+    border-bottom: 0;
+    font-weight: 700;
+    padding-top: 5px;
+  }
+
+  /* ---------- notes + signature ---------- */
+  textarea { resize: vertical; min-height: 46px; line-height: 1.5; }
+  .signrow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 34px;
+    margin-top: 20px;
+  }
+  .sigbox { padding-top: 24px; }
+  .sigline { border-top: 1px solid var(--ink); padding-top: 3px; }
+  .sigline .role {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .sigline .hint { font-size: 8.5px; color: var(--ink-3); }
+
+  .footnote {
+    margin-top: 14px;
+    padding-top: 6px;
+    border-top: 1px solid var(--rule);
+    font: 400 8.5px/1.5 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .pagemark {
+    font: 500 8.5px/1 var(--mono);
+    color: var(--ink-3);
+    text-align: right;
+    margin-top: 10px;
+  }
+
+  /* ---------- print ---------- */
+  @page { size: letter portrait; margin: 0.42in; }
+
+  @media print {
+    :root {
+      color-scheme: light;
+      --paper:#ffffff; --band:#ffffff; --ink:#000000; --ink-2:#333333; --ink-3:#555555;
+      --rule:#bbbbbb; --rule-strong:#666666; --accent:#0b5347; --accent-soft:#eef5f3;
+      --ok:#0b5b3e; --warn:#7a4d05; --crit:#8c1f25; --field:#ffffff;
+    }
+    body { background:#fff; padding: 0; font-size: 10.5pt; }
+    .no-print { display: none !important; }
+    .sheet {
+      width: auto; min-height: 0; margin: 0; padding: 0;
+      border: 0; box-shadow: none;
+    }
+    .sheet + .sheet { page-break-before: always; }
+    input, select, textarea {
+      background: transparent !important;
+      border-color: #aaa !important;
+      color: #000 !important;
+      outline: 0 !important;
+    }
+    input[type="checkbox"] { -webkit-appearance: none; appearance: none; border: 1px solid #444; }
+    input[type="checkbox"]:checked::after { content: "\2715"; display: block; font-size: 10px; line-height: 10px; text-align: center; }
+    select { -webkit-appearance: none; appearance: none; }
+    .sec, .kpiband, .funnel, tr { page-break-inside: avoid; }
+    .kpi[data-state="crit"], .kpi[data-state="warn"] { box-shadow: none; }
+    .kpi[data-state="crit"] { border-left: 3px solid var(--crit); }
+    .kpi[data-state="warn"] { border-left: 3px solid var(--warn); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  @media (max-width: 8.9in) {
+    .sheet { width: 100%; padding: 18px; }
+    .kpiband { grid-template-columns: repeat(2, 1fr); }
+    .kpi:nth-child(2) { border-right: 0; }
+    .kpi:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
+    .identity { grid-template-columns: 1fr 1fr; }
+    .idcell:nth-child(3) { border-left: 0; }
+    .routine, .checks { grid-template-columns: 1fr; }
+    .funnel { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+
+<div class="toolbar no-print">
+  <button class="btn btn-primary" id="btn-print">Print sheet</button>
+  <button class="btn" id="btn-save">Save day</button>
+  <button class="btn" id="btn-clear">Clear day</button>
+  <span class="spacer"></span>
+  <span class="saved-note" id="saved-note">Not saved yet</span>
+</div>
+
+<details class="importer no-print" id="importer">
+  <summary>Load from POMD Referral Master 2026</summary>
+
+  <p class="how">
+    In the Sheet, open the <code>Master</code> tab, select the header row plus the rows you want,
+    copy, and paste below. Column order does not matter &mdash; columns are matched by name
+    (<code>HRN</code>, <code>ROOM</code>, <code>GCS UPON REFERRAL</code>, <code>GCS CATEGORY</code>,
+    <code>DATE OF REFERRAL</code>, <code>BRAIN DEATH DECLARED</code>, <code>FAMILY APPROACHED</code>,
+    <code>FAMILY CONSENT</code>, <code>FINAL OUTCOME / STATUS</code>). Tab-separated or CSV both work.
+  </p>
+
+  <textarea id="imp-paste" placeholder="Paste the header row and the case rows here..." spellcheck="false"></textarea>
+
+  <div class="imp-controls">
+    <label class="opt"><input type="radio" name="impscope" value="date" checked> Only cases referred on the sheet date</label>
+    <label class="opt"><input type="radio" name="impscope" value="all"> All potential cases in the paste</label>
+    <button class="btn btn-primary" id="btn-import">Import potential cases</button>
+    <button class="btn" id="btn-import-clear">Clear paste</button>
+  </div>
+
+  <div class="imp-status" id="imp-status"></div>
+
+  <p class="imp-privacy">
+    Only cases in the <strong>POTENTIAL</strong> GCS category are imported. The
+    <code>NAME</code> column is discarded on import and never stored &mdash; the sheet keeps HRN only,
+    per the Data Privacy Act of 2012 (RA 10173). Nothing is sent anywhere; parsing happens in this page.
+  </p>
+</details>
+
+<!-- ============================ PAGE 1 ============================ -->
+<div class="sheet">
+
+  <header class="letterhead">
+    <p class="rep">Republic of the Philippines &middot; Department of Health<br>Davao Center for Health Development &middot; Regional Health Office XI</p>
+    <p class="org">Southern Philippines Medical Center</p>
+    <p class="unit">Organ Transplant Services Unit &middot; SHARE</p>
+  </header>
+
+  <div class="doctitle">
+    <h1>Transplant Coordinator &mdash; Daily KPI &amp; Activity Monitoring Sheet</h1>
+    <div class="meta">AIMPACT v1<br>J.P. Laurel Ave, Davao City</div>
+  </div>
+
+  <div class="identity">
+    <div class="idcell">
+      <label class="lbl" for="f-date">Date</label>
+      <input type="date" id="f-date">
+    </div>
+    <div class="idcell">
+      <label class="lbl" for="f-name">Coordinator</label>
+      <input type="text" id="f-name" placeholder="Surname, First name">
+    </div>
+    <div class="idcell">
+      <span class="lbl">Role &mdash; sets time standards</span>
+      <div class="roleset">
+        <label><input type="radio" name="role" value="CTC" checked><span>CTC</span></label>
+        <label><input type="radio" name="role" value="PTC_RN"><span>PTC&middot;RN</span></label>
+        <label><input type="radio" name="role" value="PTC_MD"><span>PTC&middot;MD</span></label>
+      </div>
+    </div>
+    <div class="idcell">
+      <span class="lbl">Scheduled context today</span>
+      <div class="daycontext" id="daycontext"><span class="tag none">Enter a date</span></div>
+    </div>
+  </div>
+
+  <!-- KPI BAND -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Daily performance summary</h2>
+      <span class="src">auto-computed from the entries below</span>
+    </div>
+    <div class="kpiband">
+      <div class="kpi" id="kpi-sla" data-state="idle">
+        <span class="k-lbl">SLA compliance</span>
+        <div class="k-val" id="kpi-sla-val">&mdash;</div>
+        <div class="k-sub" id="kpi-sla-sub">no referrals logged</div>
+      </div>
+      <div class="kpi" id="kpi-ref" data-state="idle">
+        <span class="k-lbl">Potential donors today</span>
+        <div class="k-val" id="kpi-ref-val">0</div>
+        <div class="k-sub" id="kpi-ref-sub">25 potential in 2026 YTD</div>
+      </div>
+      <div class="kpi" id="kpi-load" data-state="idle">
+        <span class="k-lbl">Workload index</span>
+        <div class="k-val" id="kpi-load-val">0.00</div>
+        <div class="k-sub" id="kpi-load-sub">0 of 480 shift min</div>
+      </div>
+      <div class="kpi" id="kpi-routine" data-state="idle">
+        <span class="k-lbl">Routine completion</span>
+        <div class="k-val" id="kpi-routine-val">0<span class="unit">%</span></div>
+        <div class="k-sub" id="kpi-routine-sub">0 of 16 completed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REFERRAL LOG -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Potential organ donor log &mdash; timed</h2>
+      <span class="src">POTENTIAL category only &middot; DCODC 2026: ack &le;10 min &middot; TC response &le;60 min &middot; activation &le;60 min</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:14%">Case ID / HRN</th>
+          <th style="width:11%">Room</th>
+          <th class="num" style="width:7%">GCS</th>
+          <th class="num" style="width:9%">Received</th>
+          <th class="num" style="width:8%">Ack&#39;d</th>
+          <th class="num" style="width:6%">&Delta;10</th>
+          <th class="num" style="width:8%">TC resp.</th>
+          <th class="num" style="width:6%">&Delta;60</th>
+          <th style="width:12%">Outcome</th>
+          <th>Non-conversion reason</th>
+        </tr>
+      </thead>
+      <tbody id="referral-body"></tbody>
+    </table>
+  </section>
+
+  <!-- FUNNEL -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Potential donor funnel &mdash; daily counts</h2>
+      <span class="src">stages and vocabulary mirror the POMD Referral Master 2026 dashboard</span>
+    </div>
+    <div class="funnel">
+      <div class="fstage">
+        <span class="f-lbl">Potential donors</span>
+        <input type="number" min="0" step="1" id="fn-referrals" placeholder="0">
+        <div class="f-rate">&nbsp;</div>
+      </div>
+      <div class="fstage">
+        <span class="f-lbl">Escalated to eligible</span>
+        <input type="number" min="0" step="1" id="fn-eligible" placeholder="0">
+        <div class="f-rate" id="rate-eligible">&nbsp;</div>
+      </div>
+      <div class="fstage">
+        <span class="f-lbl">Brain death declared</span>
+        <input type="number" min="0" step="1" id="fn-bd" placeholder="0">
+        <div class="f-rate" id="rate-bd">&nbsp;</div>
+      </div>
+      <div class="fstage">
+        <span class="f-lbl">Family approached</span>
+        <input type="number" min="0" step="1" id="fn-approached" placeholder="0">
+        <div class="f-rate" id="rate-approached">&nbsp;</div>
+      </div>
+      <div class="fstage">
+        <span class="f-lbl">Family consent</span>
+        <input type="number" min="0" step="1" id="fn-consented" placeholder="0">
+        <div class="f-rate" id="rate-consent">&nbsp;</div>
+      </div>
+      <div class="fstage">
+        <span class="f-lbl">Actual donors</span>
+        <input type="number" min="0" step="1" id="fn-donors" placeholder="0">
+        <div class="f-rate" id="rate-donor">&nbsp;</div>
+      </div>
+    </div>
+    <p class="funnote">
+      Scope: GCS category POTENTIAL only &mdash; 25 of 104 referrals in 2026 to date, roughly one every eight days.
+      Programme funnel 2026: 6 escalated to eligible &rarr; 6 brain death declared &rarr; 6 families approached &rarr; 1 consent &rarr; 1 actual donor. Consent rate 17%.
+      Cases graded possible (73) stay in the POMD Referral Master and are not tracked on this sheet.
+    </p>
+  </section>
+
+  <!-- CITIZEN'S CHARTER -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Citizen&#39;s Charter services delivered</h2>
+      <span class="src">OTSU Citizens Charter 2026 &middot; office hours 07:00&ndash;15:00, Mon&ndash;Fri</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th class="num" style="width:13%">Charter time</th>
+          <th class="num" style="width:12%">Clients served</th>
+          <th class="num" style="width:14%">Within charter</th>
+          <th class="num" style="width:13%">HCES forms issued</th>
+        </tr>
+      </thead>
+      <tbody id="charter-body"></tbody>
+    </table>
+  </section>
+
+  <div class="pagemark">Page 1 of 2 &middot; SHARE&nbsp;TC&nbsp;Daily&nbsp;KPI</div>
+</div>
+
+<!-- ============================ PAGE 2 ============================ -->
+<div class="sheet">
+
+  <div class="doctitle">
+    <h1>Daily routine, activity log &amp; sign-off</h1>
+    <div class="meta" id="page2-meta">&mdash;</div>
+  </div>
+
+  <!-- DAILY ROUTINE -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Daily routine &mdash; OTSU standing tasks</h2>
+      <span class="src">OTSU Calendar of Activities, &ldquo;Daily Routine&rdquo;</span>
+    </div>
+    <div class="routine" id="routine-grid"></div>
+  </section>
+
+  <!-- ADMIN + OUTREACH -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Routine administration, coordination &amp; internal outreach</h2>
+      <span class="src">carried from SPMC SHARE TC Daily Activity Report</span>
+    </div>
+    <div class="checks" id="admin-checks"></div>
+  </section>
+
+  <!-- ACTIVITY / TIME LOG -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Activity &amp; time log</h2>
+      <span class="src" id="act-src">standard minutes &mdash; TC Activities/Services</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th class="num" style="width:11%">Std min</th>
+          <th class="num" style="width:9%">Count</th>
+          <th class="num" style="width:12%">Subtotal</th>
+          <th style="width:22%">Status</th>
+        </tr>
+      </thead>
+      <tbody id="activity-body"></tbody>
+      <tfoot>
+        <tr class="total">
+          <td colspan="3">Productive minutes logged</td>
+          <td class="num act-sub" id="act-total">0</td>
+          <td class="mono" id="act-total-note" style="font-size:10px;color:var(--ink-3)">of 480 shift min</td>
+        </tr>
+      </tfoot>
+    </table>
+  </section>
+
+  <!-- NARRATIVE -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Narrative accomplishment report</h2>
+      <span class="src">auto-generated from every entry on both sheets</span>
+    </div>
+    <div class="narrative" id="narrative-out"></div>
+    <button class="btn no-print" id="btn-copy">Copy narrative</button>
+  </section>
+
+  <!-- OTHERS -->
+  <section class="sec">
+    <div class="sechead">
+      <h2>Others &mdash; activities not listed above</h2>
+      <span class="src">free text</span>
+    </div>
+    <textarea id="f-others" placeholder="Specify any activity, incident, near-miss, or escalation not covered by the rows above."></textarea>
+  </section>
+
+  <div class="signrow">
+    <div class="sigbox">
+      <div class="sigline">
+        <div class="role">Prepared by</div>
+        <div class="hint">Signature over printed name &mdash; Transplant Coordinator</div>
+      </div>
+    </div>
+    <div class="sigbox">
+      <div class="sigline">
+        <div class="role">Noted by</div>
+        <div class="hint">Supervisor&#39;s signature</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Record case identifiers or initials only. Full patient names must not appear on this sheet &mdash; Data Privacy Act of 2012 (RA 10173).
+    Time standards from TC Activities/Services; response-time targets from the Davao City Organ Donation Council guidelines (31 July 2026).
+  </p>
+
+  <div class="pagemark">Page 2 of 2 &middot; SHARE&nbsp;TC&nbsp;Daily&nbsp;KPI</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SHIFT_MIN = 480;          // 07:00-15:00
+  var ACK_SLA   = 10;           // minutes
+  var RESP_SLA  = 60;           // minutes
+  var REF_BASE  = 1;            // 25 potential donors in 2026 YTD - roughly 1 every 8 days
+
+  var STATUSES = ["", "Completed", "Ongoing", "Pending", "Deferred", "Cancelled"];
+
+  /* ---------- source data ---------- */
+
+  var ROUTINE = [
+    "PMOD rounds",
+    "General inquiry",
+    "Evaluation of patient documents",
+    "Answer referrals (cadaveric donors, possible recipients)",
+    "Scheduling &amp; send-out of blood to NKTI",
+    "Post-KT evaluation",
+    "Referral to Zpackage Navigator",
+    "Referral to Ethics",
+    "Donor screening prior to Ethics",
+    "Pre- and post-transplant conference",
+    "KT admission preparations",
+    "Advocacy for deceased organ donation",
+    "Inter- and intra-hospital coordination",
+    "Continuing education",
+    "Quality control",
+    "Biopsy charge slip &amp; LOA"
+  ];
+
+  var ADMIN = [
+    ["Intra-hospital / inter-departmental internal communication", "",
+     "Conducted intra-hospital and inter-departmental communication with clinical units to coordinate donation and transplant activities."],
+    ["Inter-hospital / external communication", "",
+     "Conducted inter-hospital and external communication with partner facilities and referring institutions within the donor service area."],
+    ["Updating of records", "",
+     "Updated donor, candidate and transplant records in accordance with hospital, professional and national documentation standards."],
+    ["General coordination activities", "",
+     "Carried out general coordination activities across the multidisciplinary transplant team."],
+    ["Reports (preparation, submission)", "",
+     "Prepared and submitted required unit reports."],
+    ["Quality control", "",
+     "Performed quality control review of unit documentation and processes."],
+    ["Research and development", "",
+     "Engaged in research and development work related to organ donation and transplantation."],
+    ["Visibility / relationship rounds", "High-yield units &mdash; ICU, ER, Neuro",
+     "Conducted visibility and relationship rounds in high-yield units (ICU, ER, Neuro) to build rapport and maintain a strong SHARE presence."],
+    ["Bedside huddles / micro-teaching", "Referral triggers &amp; protocols with unit staff",
+     "Held bedside huddles and micro-teaching sessions with unit nurses and residents on donor referral triggers and protocols."],
+    ["Post-donation unit debriefing", "ICU and OR staff, after a procurement",
+     "Debriefed ICU and OR staff following a procurement, sharing the outcome and reviewing the process."],
+    ["Internal awareness campaigns", "Materials set up or manned in hospital areas",
+     "Set up and manned organ donation informational materials in hospital areas."],
+    ["Hospital staff training", "Formal sessions",
+     "Delivered a formal hospital staff training session on organ and tissue donation."]
+  ];
+
+  /* verb phrases for the daily routine, inflected by status */
+  var ROUTINE_PHRASE = [
+    "PMOD rounds",
+    "general inquiry handling at the OTSU reception",
+    "evaluation of patient documents",
+    "response to referrals for cadaveric donors and possible recipients",
+    "scheduling and send-out of blood samples to NKTI",
+    "post-kidney-transplant evaluation",
+    "referral to the Zpackage Navigator",
+    "referral to Ethics",
+    "donor screening prior to Ethics review",
+    "the pre- and post-transplant conference",
+    "kidney transplant admission preparations",
+    "advocacy work for deceased organ donation",
+    "inter- and intra-hospital coordination",
+    "continuing education",
+    "quality control",
+    "biopsy charge slip and LOA processing"
+  ];
+
+  function routineSentence(phrase, status) {
+    var cap = phrase.charAt(0).toUpperCase() + phrase.slice(1);
+    switch (status) {
+      case "Completed": return "Completed " + phrase + ".";
+      case "Ongoing":   return cap + " is ongoing and carries over to the next shift.";
+      case "Pending":   return cap + " remains pending and has not been started.";
+      case "Deferred":  return cap + " was deferred to a later date.";
+      case "Cancelled": return cap + " was cancelled for the day.";
+      default: return "";
+    }
+  }
+
+  var CHARTER = [
+    ["General inquiry", "20 min"],
+    ["KT orientation", "200 min"],
+    ["Request for KT ethics evaluation", "60 min"],
+    ["Request for enlistment, national waiting list", "30 min"],
+    ["Submission of requirements for enlistment", "60 min"]
+  ];
+
+  var ACTIVITIES = {
+    CTC: [
+      ["Citizen&#39;s Charter services", null],
+      ["General inquiry", 20],
+      ["KT orientation", 210],
+      ["Request for KT evaluation", 60],
+      ["Request for enlistment to national waiting list", 30],
+      ["Submission of requirements for enlistment", 60],
+      ["Other clinical coordination", null],
+      ["Entry / updating of patient records", 32],
+      ["Coordination: extraction, packaging &amp; send-out", 120],
+      ["Coordination: intra-transplant (OR &amp; ward)", 480],
+      ["Daily rounds", 45],
+      ["Admission of patients", 180],
+      ["OR scheduling", 60],
+      ["Coordination: updating of transplant team", 60],
+      ["Preparation and routing of office documents", 30],
+      ["Charge slips for outsourced labs / diagnostics (NKTI)", 10],
+      ["Linens monitoring / packing / sterilization", 20],
+      ["Short meetings", 30],
+      ["Meetings", 90],
+      ["Reports (preparation, submission)", 120]
+    ],
+    PTC_RN: [
+      ["Procurement functions &mdash; RN", null],
+      ["Identify &amp; refer possible donors", 180],
+      ["Assists in brain death diagnosis", 60],
+      ["Confirm donor suitability", 60],
+      ["Assists in donor maintenance", 180],
+      ["Family approach", 180],
+      ["Organize organ and tissue recovery", 460],
+      ["Prepares organ sharing", 120],
+      ["Support functions", null],
+      ["Hospital staff training", 460],
+      ["Research and development", 120],
+      ["Quality control", 60],
+      ["Reports (preparation, submission)", 120],
+      ["Coordination activities", 120],
+      ["Updating of records", 60],
+      ["Intra-hospital, inter-departmental communication", 60],
+      ["Inter-hospital, external communication", 60]
+    ],
+    PTC_MD: [
+      ["Procurement functions &mdash; MD", null],
+      ["Identify &amp; refer possible donors", 240],
+      ["Assists in brain death diagnosis", 60],
+      ["Confirm donor suitability", 120],
+      ["Donor maintenance", 240],
+      ["Family approach", 0],
+      ["Organize organ and tissue recovery", 240],
+      ["Prepares organ sharing", 120],
+      ["Support functions", null],
+      ["Hospital staff training", 460],
+      ["Research and development", 120],
+      ["Quality control", 60],
+      ["Reports (preparation, submission)", 60],
+      ["Coordination activities", 60],
+      ["Updating of records", 60],
+      ["Intra-hospital, inter-departmental communication", 60],
+      ["Inter-hospital, external communication", 60]
+    ]
+  };
+
+  /* vocabulary mirrored from POMD Referral Master 2026 */
+  var OUTCOMES = ["", "Monitoring", "Recovered", "Expired", "DNR",
+                  "Brain death declared", "Actual donor", "Pending"];
+  var REASONS = ["", "Family refusal", "DNR / family opted DNR", "Medical unsuitability",
+                 "No brain death declaration", "Cardiac arrest before retrieval", "Late referral",
+                 "Logistics / OR unavailable", "Recipient unavailable", "Other"];
+
+  var REFERRAL_ROWS = 5;
+
+  /* ---------- helpers ---------- */
+
+  function el(id) { return document.getElementById(id); }
+
+  function options(list, cls) {
+    return list.map(function (o) {
+      return '<option value="' + o + '">' + (o || "&mdash;") + "</option>";
+    }).join("");
+  }
+
+  function toMinutes(v) {
+    if (!v) { return null; }
+    var p = v.split(":");
+    if (p.length !== 2) { return null; }
+    var h = parseInt(p[0], 10), m = parseInt(p[1], 10);
+    if (isNaN(h) || isNaN(m)) { return null; }
+    return h * 60 + m;
+  }
+
+  function delta(a, b) {
+    var x = toMinutes(a), y = toMinutes(b);
+    if (x === null || y === null) { return null; }
+    var d = y - x;
+    if (d < 0) { d += 1440; }          // crossed midnight
+    return d;
+  }
+
+  function num(id) {
+    var v = parseFloat(el(id).value);
+    return isNaN(v) ? 0 : v;
+  }
+
+  function pct(a, b) {
+    if (!b) { return null; }
+    return Math.round((a / b) * 100);
+  }
+
+  /* ---------- build the DOM ---------- */
+
+  function buildReferrals(rows) {
+    var total = Math.max(REFERRAL_ROWS, rows || 0);
+    var html = "";
+    for (var i = 0; i < total; i++) {
+      html +=
+        "<tr data-ref='" + i + "'>" +
+          "<td><input type='text' data-f='id' placeholder='HRN'></td>" +
+          "<td><input type='text' data-f='room' placeholder='ICU'></td>" +
+          "<td class='num'><input type='number' data-f='gcs' min='3' max='15' placeholder='&ndash;'></td>" +
+          "<td class='num'><input type='time' data-f='recv'></td>" +
+          "<td class='num'><input type='time' data-f='ack'></td>" +
+          "<td class='num'><span class='flag idle' data-f='ackflag'>&mdash;</span></td>" +
+          "<td class='num'><input type='time' data-f='resp'></td>" +
+          "<td class='num'><span class='flag idle' data-f='respflag'>&mdash;</span></td>" +
+          "<td><select data-f='outcome'>" + options(OUTCOMES) + "</select></td>" +
+          "<td><select data-f='reason'>" + options(REASONS) + "</select></td>" +
+        "</tr>";
+    }
+    el("referral-body").innerHTML = html;
+  }
+
+  function buildCharter() {
+    el("charter-body").innerHTML = CHARTER.map(function (r) {
+      return "<tr>" +
+        "<td>" + r[0] + "</td>" +
+        "<td class='num mono' style='color:var(--ink-3)'>" + r[1] + "</td>" +
+        "<td class='num'><input type='number' min='0' step='1' data-cc='served' placeholder='0'></td>" +
+        "<td class='num'><input type='number' min='0' step='1' data-cc='within' placeholder='0'></td>" +
+        "<td class='num'><input type='number' min='0' step='1' data-cc='hces' placeholder='0'></td>" +
+      "</tr>";
+    }).join("");
+  }
+
+  function buildRoutine() {
+    el("routine-grid").innerHTML = ROUTINE.map(function (r, i) {
+      return "<div class='ritem'>" +
+        "<div class='rrow'>" +
+          "<span class='rnum'>" + (i + 1) + "</span>" +
+          "<span>" + r + "</span>" +
+          "<select class='status' data-routine='" + i + "' data-s=''>" + options(STATUSES) + "</select>" +
+        "</div>" +
+        "<div class='narr' data-narr-routine='" + i + "' hidden></div>" +
+      "</div>";
+    }).join("");
+  }
+
+  function buildAdmin() {
+    el("admin-checks").innerHTML = ADMIN.map(function (a, i) {
+      return "<div class='chkwrap'>" +
+        "<label class='chk'>" +
+          "<input type='checkbox' data-admin='" + i + "'>" +
+          "<span>" + a[0] + (a[1] ? "<span class='sub'>" + a[1] + "</span>" : "") + "</span>" +
+        "</label>" +
+        "<div class='narr' data-narr-admin='" + i + "' hidden>" + a[2] + "</div>" +
+      "</div>";
+    }).join("");
+  }
+
+  function buildActivities() {
+    var role = document.querySelector("input[name=role]:checked").value;
+    var rows = ACTIVITIES[role];
+    var html = "";
+    rows.forEach(function (r, i) {
+      if (r[1] === null) {
+        html += "<tr><td class='actgroup' colspan='5'>" + r[0] + "</td></tr>";
+      } else {
+        html += "<tr data-act='" + i + "'>" +
+          "<td>" + r[0] + "</td>" +
+          "<td class='num mono' style='color:var(--ink-3)' data-std='" + r[1] + "'>" + r[1] + "</td>" +
+          "<td class='num'><input type='number' class='act-count' min='0' step='1' data-f='count' placeholder='0'></td>" +
+          "<td class='num act-sub' data-f='sub'>&mdash;</td>" +
+          "<td><select class='status' data-f='status' data-s=''>" + options(STATUSES) + "</select></td>" +
+        "</tr>" +
+        "<tr class='narr-row' data-narr-act='" + i + "' hidden><td colspan='5' style='border-bottom:1px solid var(--rule);padding:0'>" +
+          "<div class='narr' style='margin-left:4px'></div></td></tr>";
+      }
+    });
+    el("activity-body").innerHTML = html;
+    el("act-src").textContent = "standard minutes for " + role.replace("_", "/") + " - TC Activities/Services";
+  }
+
+  /* ---------- day context ---------- */
+
+  function dayContext(value) {
+    if (!value) { return null; }
+    var parts = value.split("-");
+    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    if (isNaN(d.getTime())) { return null; }
+
+    var dow = d.getDay();                       // 0 Sun .. 6 Sat
+    var dom = d.getDate();
+    var nth = Math.floor((dom - 1) / 7) + 1;    // nth occurrence of this weekday
+    var lastOfMonth = new Date(+parts[0], +parts[1], 0).getDate();
+    var isLast = dom + 7 > lastOfMonth;
+
+    var tags = [];
+    if (dow === 1 && nth === 1) { tags.push("Orientation"); }
+    if (dow === 1 && isLast)    { tags.push("OTSU meeting"); }
+    if (dow === 2)              { tags.push("Kidney transplant"); }
+    if (dow === 4)              { tags.push("KT clinic"); }
+    if (dow === 4 && nth === 3) { tags.push("Ethics"); }
+    if (dow === 4 && nth === 4) { tags.push("COTA"); }
+    if (dow === 0 || dow === 6) { tags.push("Weekend &mdash; outside charter hours"); }
+    return tags;
+  }
+
+  function renderDayContext() {
+    var tags = dayContext(el("f-date").value);
+    var box = el("daycontext");
+    if (tags === null) {
+      box.innerHTML = "<span class='tag none'>Enter a date</span>";
+    } else if (!tags.length) {
+      box.innerHTML = "<span class='tag none'>No fixed activity scheduled</span>";
+    } else {
+      box.innerHTML = tags.map(function (t) { return "<span class='tag'>" + t + "</span>"; }).join("");
+    }
+
+    var name = el("f-name").value.trim();
+    var dv = el("f-date").value;
+    el("page2-meta").innerHTML = (dv || "&mdash;") + (name ? "<br>" + name : "");
+  }
+
+  /* ---------- compute ---------- */
+
+  function setKpi(id, state, val, sub) {
+    var box = el(id);
+    box.setAttribute("data-state", state);
+    el(id + "-val").innerHTML = val;
+    el(id + "-sub").innerHTML = sub;
+  }
+
+  function computeReferrals() {
+    var rows = document.querySelectorAll("[data-ref]");
+    var clocks = 0, met = 0, logged = 0;
+
+    Array.prototype.forEach.call(rows, function (row) {
+      var get = function (f) { return row.querySelector("[data-f=" + f + "]"); };
+      var recv = get("recv").value;
+      var ack  = get("ack").value;
+      var resp = get("resp").value;
+
+      if (get("id").value.trim() || recv) { logged++; }
+
+      var dAck = delta(recv, ack);
+      var fAck = get("ackflag");
+      if (dAck === null) {
+        fAck.className = "flag idle";
+        fAck.innerHTML = "&mdash;";
+      } else {
+        clocks++;
+        var okAck = dAck <= ACK_SLA;
+        if (okAck) { met++; }
+        fAck.className = "flag " + (okAck ? "ok" : "bad");
+        fAck.textContent = dAck + "m";
+      }
+
+      var dResp = delta(recv, resp);
+      var fResp = get("respflag");
+      if (dResp === null) {
+        fResp.className = "flag idle";
+        fResp.innerHTML = "&mdash;";
+      } else {
+        clocks++;
+        var okResp = dResp <= RESP_SLA;
+        if (okResp) { met++; }
+        fResp.className = "flag " + (okResp ? "ok" : "bad");
+        fResp.textContent = dResp + "m";
+      }
+    });
+
+    return { clocks: clocks, met: met, logged: logged };
+  }
+
+  function computeActivities() {
+    var total = 0;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
+      var std = parseFloat(row.querySelector("[data-std]").getAttribute("data-std"));
+      var c = parseFloat(row.querySelector("[data-f=count]").value);
+      var cell = row.querySelector("[data-f=sub]");
+      if (isNaN(c) || c <= 0) {
+        cell.innerHTML = "&mdash;";
+      } else {
+        var sub = std * c;
+        total += sub;
+        cell.textContent = sub;
+      }
+    });
+    return total;
+  }
+
+  function computeRoutine() {
+    var sels = document.querySelectorAll("[data-routine]");
+    var done = 0, applicable = 0;
+    Array.prototype.forEach.call(sels, function (s) {
+      s.setAttribute("data-s", s.value);
+      if (s.value === "Completed") { done++; }
+      if (s.value && s.value !== "Deferred" && s.value !== "Cancelled") { applicable++; }
+    });
+    return { done: done, applicable: applicable, total: sels.length };
+  }
+
+  function computeFunnel() {
+    var r = num("fn-referrals"), e = num("fn-eligible"), b = num("fn-bd"),
+        a = num("fn-approached"), c = num("fn-consented"), d = num("fn-donors");
+
+    var show = function (id, label, n, den) {
+      var p = pct(n, den);
+      el(id).innerHTML = (p === null) ? "&nbsp;" : label + " " + p + "%";
+    };
+    show("rate-eligible", "elig.", e, r);
+    show("rate-bd", "BD", b, e);
+    show("rate-approached", "appr.", a, b);
+    show("rate-consent", "consent", c, a);
+    show("rate-donor", "conv.", d, c);
+    return r;
+  }
+
+  /* ---------- POMD Master import ---------- */
+
+  function splitLine(line, delim) {
+    var out = [], cur = "", q = false, i;
+    for (i = 0; i < line.length; i++) {
+      var ch = line.charAt(i);
+      if (q) {
+        if (ch === '"') {
+          if (line.charAt(i + 1) === '"') { cur += '"'; i++; }
+          else { q = false; }
+        } else { cur += ch; }
+      } else if (ch === '"') {
+        q = true;
+      } else if (ch === delim) {
+        out.push(cur); cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+    out.push(cur);
+    return out.map(function (c) { return c.trim(); });
+  }
+
+  function parseTable(text) {
+    var lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n")
+      .filter(function (l) { return l.trim() !== ""; });
+    if (lines.length < 2) { return null; }
+    var delim = (lines[0].indexOf("\t") > -1) ? "\t" : ",";
+    return lines.map(function (l) { return splitLine(l, delim); });
+  }
+
+  function normKey(s) { return String(s).toUpperCase().replace(/[^A-Z0-9]/g, ""); }
+
+  function colIndex(headers, wanted) {
+    var w = normKey(wanted), i;
+    for (i = 0; i < headers.length; i++) {
+      if (normKey(headers[i]) === w) { return i; }
+    }
+    for (i = 0; i < headers.length; i++) {
+      if (normKey(headers[i]).indexOf(w) > -1) { return i; }
+    }
+    return -1;
+  }
+
+  function isYes(v) { return /^(y|yes|true|1)\b/i.test(String(v).trim()); }
+
+  /* the Master stores dates as 2026-01-03 or 1/3/2026 - normalise to ISO */
+  function isoDate(v) {
+    var s = String(v).trim();
+    if (!s) { return ""; }
+    var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) {
+      return m[1] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[3]).slice(-2);
+    }
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) {
+      return m[3] + "-" + ("0" + m[1]).slice(-2) + "-" + ("0" + m[2]).slice(-2);
+    }
+    return s;
+  }
+
+  /* map the Master's outcome vocabulary onto this sheet's picklist */
+  function mapOutcome(finalOutcome, bdDeclared, consent, organs) {
+    var f = String(finalOutcome || "").toLowerCase();
+    if (organs && String(organs).trim() && !/^(-|n\/?a|none)$/i.test(String(organs).trim())) {
+      return "Actual donor";
+    }
+    if (f.indexOf("donor") > -1) { return "Actual donor"; }
+    if (f.indexOf("dnr") > -1) { return "DNR"; }
+    if (f.indexOf("expired") > -1) { return "Expired"; }
+    if (f.indexOf("recovered") > -1) { return "Recovered"; }
+    if (f.indexOf("pending") > -1) { return "Pending"; }
+    if (isYes(bdDeclared)) { return "Brain death declared"; }
+    if (String(consent || "").toLowerCase().indexOf("refus") > -1) { return "Expired"; }
+    return "Monitoring";
+  }
+
+  function mapReason(consent, optedDnr, finalOutcome) {
+    var c = String(consent || "").toLowerCase();
+    if (c.indexOf("refus") > -1 || c.indexOf("no") === 0) { return "Family refusal"; }
+    if (isYes(optedDnr) || String(finalOutcome || "").toLowerCase().indexOf("dnr") > -1) {
+      return "DNR / family opted DNR";
+    }
+    return "";
+  }
+
+  function status(msg, cls) {
+    var box = el("imp-status");
+    box.textContent = msg;
+    box.className = "imp-status" + (cls ? " " + cls : "");
+  }
+
+  function runImport() {
+    var text = el("imp-paste").value;
+    if (!text.trim()) { status("Nothing pasted yet.", "bad"); return; }
+
+    var table = parseTable(text);
+    if (!table) { status("Could not read that - paste the header row plus at least one case row.", "bad"); return; }
+
+    var headers = table[0];
+    var iHrn   = colIndex(headers, "HRN");
+    var iCat   = colIndex(headers, "GCS CATEGORY");
+    if (iCat === -1) {
+      status("No 'GCS CATEGORY' column found. Include the header row from the Master tab.", "bad");
+      return;
+    }
+
+    var iRoom  = colIndex(headers, "ROOM");
+    var iGcs   = colIndex(headers, "GCS UPON REFERRAL");
+    var iDate  = colIndex(headers, "DATE OF REFERRAL");
+    var iFinal = colIndex(headers, "FINAL OUTCOME");
+    var iBd    = colIndex(headers, "BRAIN DEATH DECLARED");
+    var iAppr  = colIndex(headers, "FAMILY APPROACHED");
+    var iCons  = colIndex(headers, "FAMILY CONSENT");
+    var iDnr   = colIndex(headers, "FAMILY OPTED DNR");
+    var iOrg   = colIndex(headers, "ORGANS DONATED");
+
+    var scope = document.querySelector("input[name=impscope]:checked").value;
+    var sheetDate = el("f-date").value;
+
+    var cell = function (row, idx) { return (idx > -1 && row[idx] !== undefined) ? String(row[idx]).trim() : ""; };
+
+    var matched = [], skippedCat = 0, skippedDate = 0;
+
+    table.slice(1).forEach(function (row) {
+      if (!row.join("").trim()) { return; }
+      if (normKey(cell(row, iCat)) !== "POTENTIAL") { skippedCat++; return; }
+      var d = isoDate(cell(row, iDate));
+      if (scope === "date" && sheetDate && d && d !== sheetDate) { skippedDate++; return; }
+      matched.push({
+        hrn: cell(row, iHrn),
+        room: cell(row, iRoom),
+        gcs: (cell(row, iGcs).match(/\d+/) || [""])[0],
+        date: d,
+        bd: cell(row, iBd),
+        appr: cell(row, iAppr),
+        cons: cell(row, iCons),
+        dnr: cell(row, iDnr),
+        organs: cell(row, iOrg),
+        final: cell(row, iFinal)
+      });
+    });
+
+    if (!matched.length) {
+      var why = "No potential cases matched.";
+      if (skippedCat) { why += " " + skippedCat + " row(s) were a different GCS category."; }
+      if (skippedDate) { why += " " + skippedDate + " potential row(s) had a different referral date - switch to 'All potential cases' to include them."; }
+      status(why, "bad");
+      return;
+    }
+
+    /* grow the log if the day needs more than five rows */
+    buildReferrals(matched.length);
+
+    matched.forEach(function (m, i) {
+      var row = document.querySelector("[data-ref='" + i + "']");
+      if (!row) { return; }
+      var set = function (f, v) {
+        var c = row.querySelector("[data-f=" + f + "]");
+        if (c && v) { c.value = v; }
+      };
+      set("id", m.hrn);
+      set("room", m.room);
+      set("gcs", m.gcs);
+      set("outcome", mapOutcome(m.final, m.bd, m.cons, m.organs));
+      set("reason", mapReason(m.cons, m.dnr, m.final));
+    });
+
+    /* funnel counts derived from the same matched set */
+    var count = function (fn) { return matched.filter(fn).length; };
+    el("fn-referrals").value = matched.length;
+    el("fn-bd").value        = count(function (m) { return isYes(m.bd); });
+    el("fn-approached").value = count(function (m) { return isYes(m.appr); });
+    el("fn-consented").value  = count(function (m) { return isYes(m.cons); });
+    el("fn-donors").value     = count(function (m) {
+      return (m.organs && !/^(-|n\/?a|none)$/i.test(m.organs)) ||
+             String(m.final).toLowerCase().indexOf("donor") > -1;
+    });
+    /* 'escalated to eligible' cannot be derived here: once a case is re-graded
+       Eligible in the Master it no longer matches a potential-only import. */
+
+    compute();
+
+    var note = "Imported " + matched.length + " potential case" + (matched.length === 1 ? "" : "s") +
+               ". Names discarded; HRN kept.";
+    if (skippedCat) { note += " Skipped " + skippedCat + " non-potential row(s)."; }
+    if (skippedDate) { note += " Skipped " + skippedDate + " on other dates."; }
+    note += " Still to enter by hand: the acknowledgement and response clocks, and any escalation to eligible.";
+    status(note, "good");
+  }
+
+  /* ---------- narrative ---------- */
+
+  function narrateReferrals() {
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ref]"), function (row) {
+      var g = function (f) { return row.querySelector("[data-f=" + f + "]"); };
+      var id = g("id").value.trim();
+      var recv = g("recv").value;
+      if (!id && !recv) { return; }
+
+      var s = "Potential donor " + (id || "unidentified");
+      var room = g("room").value.trim();
+      var gcs = g("gcs").value.trim();
+      var bits = [];
+      if (room) { bits.push(room); }
+      if (gcs) { bits.push("GCS " + gcs); }
+      if (bits.length) { s += " (" + bits.join(", ") + ")"; }
+
+      var clauses = [];
+      if (recv) { clauses.push("referral received at " + recv); }
+
+      var dAck = delta(recv, g("ack").value);
+      if (dAck !== null) {
+        clauses.push("acknowledged at " + g("ack").value + " (" + dAck + " min, " +
+          (dAck <= ACK_SLA ? "within" : "exceeding") + " the 10-minute target)");
+      }
+      var dResp = delta(recv, g("resp").value);
+      if (dResp !== null) {
+        clauses.push("coordinator responded at " + g("resp").value + " (" + dResp + " min, " +
+          (dResp <= RESP_SLA ? "within" : "exceeding") + " the 60-minute target)");
+      }
+      if (clauses.length) { s += ": " + clauses.join("; "); }
+      s += ".";
+
+      var outcome = g("outcome").value;
+      var reason = g("reason").value;
+      if (outcome) {
+        s += " Outcome: " + outcome.toLowerCase() + ".";
+        if (reason) { s += " Non-conversion reason recorded as " + reason.toLowerCase() + "."; }
+      }
+      out.push(s);
+    });
+    return out;
+  }
+
+  function narrateFunnel() {
+    var r = num("fn-referrals"), e = num("fn-eligible"), b = num("fn-bd"),
+        a = num("fn-approached"), c = num("fn-consented"), d = num("fn-donors");
+    if (!(r || e || b || a || c || d)) { return ""; }
+
+    var s = r + " potential organ donor" + (r === 1 ? "" : "s") + " tracked, " +
+            e + " escalated to eligible, " +
+            b + " with brain death declared, " +
+            a + " famil" + (a === 1 ? "y" : "ies") + " approached, " +
+            c + " consent" + (c === 1 ? "" : "s") + " obtained, " +
+            d + " actual donor" + (d === 1 ? "" : "s") + ".";
+    var rates = [];
+    if (a && pct(c, a) !== null) { rates.push("consent rate " + pct(c, a) + "%"); }
+    if (b && pct(a, b) !== null) { rates.push("approach rate " + pct(a, b) + "%"); }
+    if (r && pct(e, r) !== null) { rates.push("escalation rate " + pct(e, r) + "%"); }
+    if (rates.length) { s += " " + rates.join(", ").replace(/^./, function (m) { return m.toUpperCase(); }) + "."; }
+    return s;
+  }
+
+  function narrateCharter() {
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#charter-body tr"), function (row, i) {
+      var served = parseFloat(row.querySelector("[data-cc=served]").value) || 0;
+      if (!served) { return; }
+      var within = parseFloat(row.querySelector("[data-cc=within]").value);
+      var hces = parseFloat(row.querySelector("[data-cc=hces]").value);
+      var name = CHARTER[i][0].toLowerCase();
+      var s = "Served " + served + " client" + (served === 1 ? "" : "s") + " for " + name +
+              " (charter time " + CHARTER[i][1] + ")";
+      if (!isNaN(within)) {
+        s += ", " + within + " within charter time";
+        var p = pct(within, served);
+        if (p !== null) { s += " (" + p + "%)"; }
+      }
+      if (!isNaN(hces) && hces) { s += "; " + hces + " HCES form" + (hces === 1 ? "" : "s") + " issued"; }
+      out.push(s + ".");
+    });
+    return out;
+  }
+
+  function narrateActivities() {
+    var role = document.querySelector("input[name=role]:checked").value;
+    var rows = ACTIVITIES[role];
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
+      var i = parseInt(row.getAttribute("data-act"), 10);
+      var c = parseFloat(row.querySelector("[data-f=count]").value);
+      var holder = document.querySelector("[data-narr-act='" + i + "']");
+      if (isNaN(c) || c <= 0) {
+        if (holder) { holder.hidden = true; }
+        return;
+      }
+      var std = parseFloat(row.querySelector("[data-std]").getAttribute("data-std"));
+      var label = rows[i][0].replace(/&amp;/g, "&").replace(/&mdash;/g, "-");
+      var status = row.querySelector("[data-f=status]").value;
+      var s = "Logged " + c + " x " + label.toLowerCase() +
+              " at " + std + " standard min each, " + (std * c) + " min total" +
+              (status ? " (" + status.toLowerCase() + ")" : "") + ".";
+      if (holder) {
+        holder.hidden = false;
+        holder.querySelector(".narr").textContent = s;
+      }
+      out.push(s);
+    });
+    return out;
+  }
+
+  function narrateChecklists() {
+    var admin = [], routine = [];
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-admin]"), function (chk) {
+      var i = parseInt(chk.getAttribute("data-admin"), 10);
+      var holder = document.querySelector("[data-narr-admin='" + i + "']");
+      if (holder) { holder.hidden = !chk.checked; }
+      if (chk.checked) { admin.push(ADMIN[i][2]); }
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-routine]"), function (sel) {
+      var i = parseInt(sel.getAttribute("data-routine"), 10);
+      var holder = document.querySelector("[data-narr-routine='" + i + "']");
+      var s = routineSentence(ROUTINE_PHRASE[i], sel.value);
+      if (holder) {
+        holder.hidden = !s;
+        holder.textContent = s;
+      }
+      if (s) { routine.push(s); }
+    });
+
+    return { admin: admin, routine: routine };
+  }
+
+  function block(title, items) {
+    if (!items || !items.length) { return ""; }
+    return "<h3>" + title + "</h3><ul>" +
+      items.map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
+  }
+
+  function renderNarrative() {
+    var lists = narrateChecklists();
+    var refs = narrateReferrals();
+    var funnel = narrateFunnel();
+    var charter = narrateCharter();
+    var acts = narrateActivities();
+    var others = el("f-others").value.trim();
+
+    var name = el("f-name").value.trim();
+    var date = el("f-date").value;
+    var role = document.querySelector("input[name=role]:checked").value.replace("_", "/");
+
+    var html = "";
+    if (date || name) {
+      html += "<p><strong>" + (name || "Transplant coordinator") + "</strong> &mdash; " +
+              role + (date ? ", " + date : "") + ".</p>";
+    }
+
+    html += block("Potential organ donors", refs);
+    if (funnel) { html += "<h3>Funnel summary</h3><p>" + funnel + "</p>"; }
+    html += block("Citizen&#39;s Charter services", charter);
+    html += block("Daily routine", lists.routine);
+    html += block("Administration, coordination &amp; outreach", lists.admin);
+    html += block("Activity &amp; time log", acts);
+    if (others) { html += "<h3>Other activities</h3><p>" + others.replace(/</g, "&lt;") + "</p>"; }
+
+    if (!refs.length && !funnel && !charter.length && !lists.routine.length &&
+        !lists.admin.length && !acts.length && !others) {
+      html = "<p class='empty'>Nothing logged yet. Tick a task, set a status, or enter a count and its narrative appears here automatically.</p>";
+    }
+
+    el("narrative-out").innerHTML = html;
+  }
+
+  function compute() {
+    var ref = computeReferrals();
+    var mins = computeActivities();
+    var routine = computeRoutine();
+    var funnelRefs = computeFunnel();
+
+    /* SLA */
+    if (!ref.clocks) {
+      setKpi("kpi-sla", "idle", "&mdash;", ref.logged ? "times not yet entered" : "no referrals logged");
+    } else {
+      var p = Math.round((ref.met / ref.clocks) * 100);
+      var state = p === 100 ? "ok" : (p >= 80 ? "warn" : "crit");
+      setKpi("kpi-sla", state, p + "<span class='unit'>%</span>",
+             ref.met + " of " + ref.clocks + " clocks met");
+    }
+
+    /* referrals */
+    var refCount = Math.max(funnelRefs, ref.logged);
+    var refState = refCount === 0 ? "idle" : (refCount >= REF_BASE ? "ok" : "warn");
+    setKpi("kpi-ref", refState, String(refCount), "25 potential in 2026 YTD");
+
+    /* workload */
+    var idx = mins / SHIFT_MIN;
+    var loadState = mins === 0 ? "idle" : (idx > 1.15 ? "crit" : (idx >= 0.6 ? "ok" : "warn"));
+    setKpi("kpi-load", loadState, idx.toFixed(2), mins + " of " + SHIFT_MIN + " shift min");
+    el("act-total").textContent = mins;
+    el("act-total-note").textContent = "of " + SHIFT_MIN + " shift min / index " + idx.toFixed(2);
+
+    /* routine */
+    var rp = routine.total ? Math.round((routine.done / routine.total) * 100) : 0;
+    var rState = routine.done === 0 ? "idle" : (rp >= 80 ? "ok" : (rp >= 50 ? "warn" : "crit"));
+    setKpi("kpi-routine", rState, rp + "<span class='unit'>%</span>",
+           routine.done + " of " + routine.total + " completed");
+
+    /* status chip colours in the activity table */
+    Array.prototype.forEach.call(document.querySelectorAll("[data-f=status]"), function (s) {
+      s.setAttribute("data-s", s.value);
+    });
+
+    renderNarrative();
+  }
+
+  /* ---------- persistence ---------- */
+
+  function storageKey() {
+    return "share-tc-dash:" + (el("f-date").value || "undated");
+  }
+
+  function collect() {
+    var data = { fields: {}, refs: [], acts: [], routine: [], admin: [], charter: [] };
+
+    ["f-date", "f-name", "f-others", "fn-referrals", "fn-eligible", "fn-bd",
+     "fn-approached", "fn-consented", "fn-donors"].forEach(function (id) {
+      data.fields[id] = el(id).value;
+    });
+    data.fields.role = document.querySelector("input[name=role]:checked").value;
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ref]"), function (row) {
+      var o = {};
+      Array.prototype.forEach.call(row.querySelectorAll("input,select"), function (c) {
+        o[c.getAttribute("data-f")] = c.value;
+      });
+      data.refs.push(o);
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
+      data.acts.push({
+        count: row.querySelector("[data-f=count]").value,
+        status: row.querySelector("[data-f=status]").value
+      });
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-routine]"), function (s) {
+      data.routine.push(s.value);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-admin]"), function (c) {
+      data.admin.push(c.checked);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#charter-body tr"), function (row) {
+      var o = {};
+      Array.prototype.forEach.call(row.querySelectorAll("input"), function (c) {
+        o[c.getAttribute("data-cc")] = c.value;
+      });
+      data.charter.push(o);
+    });
+    return data;
+  }
+
+  function apply(data) {
+    if (!data) { return; }
+
+    Object.keys(data.fields || {}).forEach(function (id) {
+      if (id === "role") { return; }
+      if (el(id)) { el(id).value = data.fields[id]; }
+    });
+    if (data.fields && data.fields.role) {
+      var r = document.querySelector("input[name=role][value=" + data.fields.role + "]");
+      if (r) { r.checked = true; buildActivities(); }
+    }
+
+    if ((data.refs || []).length > document.querySelectorAll("[data-ref]").length) {
+      buildReferrals(data.refs.length);
+    }
+    (data.refs || []).forEach(function (o, i) {
+      var row = document.querySelector("[data-ref='" + i + "']");
+      if (!row) { return; }
+      Object.keys(o).forEach(function (f) {
+        var c = row.querySelector("[data-f=" + f + "]");
+        if (c && c.tagName !== "SPAN") { c.value = o[f]; }
+      });
+    });
+
+    var actRows = document.querySelectorAll("[data-act]");
+    (data.acts || []).forEach(function (o, i) {
+      if (!actRows[i]) { return; }
+      actRows[i].querySelector("[data-f=count]").value = o.count;
+      actRows[i].querySelector("[data-f=status]").value = o.status;
+    });
+
+    var rSels = document.querySelectorAll("[data-routine]");
+    (data.routine || []).forEach(function (v, i) { if (rSels[i]) { rSels[i].value = v; } });
+
+    var aChk = document.querySelectorAll("[data-admin]");
+    (data.admin || []).forEach(function (v, i) { if (aChk[i]) { aChk[i].checked = v; } });
+
+    var cRows = document.querySelectorAll("#charter-body tr");
+    (data.charter || []).forEach(function (o, i) {
+      if (!cRows[i]) { return; }
+      Object.keys(o).forEach(function (f) {
+        var c = cRows[i].querySelector("[data-cc=" + f + "]");
+        if (c) { c.value = o[f]; }
+      });
+    });
+  }
+
+  function save(silent) {
+    try {
+      localStorage.setItem(storageKey(), JSON.stringify(collect()));
+      var t = new Date();
+      el("saved-note").textContent = "Saved " +
+        String(t.getHours()).padStart(2, "0") + ":" +
+        String(t.getMinutes()).padStart(2, "0") +
+        " - " + (el("f-date").value || "undated");
+    } catch (e) {
+      if (!silent) { el("saved-note").textContent = "Could not save - storage unavailable"; }
+    }
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(storageKey());
+      if (!raw) {
+        el("saved-note").textContent = "No saved entry for this date";
+        return false;
+      }
+      apply(JSON.parse(raw));
+      el("saved-note").textContent = "Loaded saved entry for " + el("f-date").value;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /* ---------- wire up ---------- */
+
+  buildReferrals();
+  buildCharter();
+  buildRoutine();
+  buildAdmin();
+  buildActivities();
+
+  var today = new Date();
+  el("f-date").value = today.getFullYear() + "-" +
+    String(today.getMonth() + 1).padStart(2, "0") + "-" +
+    String(today.getDate()).padStart(2, "0");
+
+  load();
+  renderDayContext();
+  compute();
+
+  document.addEventListener("input", function (e) {
+    if (e.target.id === "f-date") { load(); renderDayContext(); }
+    if (e.target.id === "f-name") { renderDayContext(); }
+    compute();
+  });
+
+  document.addEventListener("change", function (e) {
+    if (e.target.name === "role") { buildActivities(); }
+    compute();
+  });
+
+  el("btn-import").addEventListener("click", runImport);
+  el("btn-import-clear").addEventListener("click", function () {
+    el("imp-paste").value = "";
+    status("");
+  });
+
+  el("btn-copy").addEventListener("click", function () {
+    var txt = el("narrative-out").innerText;
+    var btn = el("btn-copy");
+    var done = function (ok) {
+      btn.textContent = ok ? "Copied" : "Copy failed";
+      setTimeout(function () { btn.textContent = "Copy narrative"; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
+    } else {
+      done(false);
+    }
+  });
+
+  el("btn-print").addEventListener("click", function () { save(true); window.print(); });
+  el("btn-save").addEventListener("click", function () { save(false); });
+  el("btn-clear").addEventListener("click", function () {
+    if (!window.confirm("Clear every entry on this sheet for " + (el("f-date").value || "this date") + "?")) { return; }
+    try { localStorage.removeItem(storageKey()); } catch (e) {}
+    Array.prototype.forEach.call(document.querySelectorAll("input,select,textarea"), function (c) {
+      if (c.type === "checkbox") { c.checked = false; }
+      else if (c.type === "radio") { /* keep role */ }
+      else if (c.id !== "f-date") { c.value = ""; }
+    });
+    el("saved-note").textContent = "Cleared";
+    renderDayContext();
+    compute();
+  });
+})();
+</script>
+
+</body>
+</html>
