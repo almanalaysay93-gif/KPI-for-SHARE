@@ -432,18 +432,6 @@
     min-height: 13px;
   }
 
-  /* ---------- routine grid ---------- */
-  .routine { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
-  .rrow {
-    display: grid;
-    grid-template-columns: 15px 1fr auto;
-    align-items: center;
-    gap: 5px;
-    padding: 2.5px 0;
-    border-bottom: 1px dotted var(--rule);
-    font-size: 11.5px;
-  }
-  .rrow .rnum { font: 500 8.5px/1 var(--mono); color: var(--ink-3); }
   .status {
     font-family: var(--sans);
     font-size: 9.5px;
@@ -604,7 +592,7 @@
     .sheet { width: 100%; padding: 18px; }
     .identity { grid-template-columns: 1fr 1fr; }
     .idcell:nth-child(3) { border-left: 0; }
-    .routine, .checks { grid-template-columns: 1fr; }
+    .checks { grid-template-columns: 1fr; }
     .funnel { grid-template-columns: repeat(2, 1fr); }
     .fstage:nth-child(n+3) { border-top: 1px solid var(--rule); }
     .fstage:nth-child(2n) { border-right: 0; }
@@ -678,7 +666,7 @@
       <input type="text" id="f-name" placeholder="Surname, First name">
     </div>
     <div class="idcell">
-      <span class="lbl">Role &mdash; sets time standards</span>
+      <span class="lbl">Role</span>
       <div class="roleset">
         <label><input type="radio" name="role" value="CTC" checked><span>CTC</span></label>
         <label><input type="radio" name="role" value="PTC_RN"><span>PTC&middot;RN</span></label>
@@ -810,9 +798,27 @@
   <section class="sec">
     <div class="sechead">
       <h2>Daily routine &mdash; OTSU standing tasks</h2>
-      <span class="src">OTSU Calendar of Activities, &ldquo;Daily Routine&rdquo;</span>
+      <span class="src">OTSU Calendar of Activities, &ldquo;Daily Routine&rdquo; &middot; std min entered by coordinator, not a published schedule</span>
     </div>
-    <div class="routine" id="routine-grid"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th class="num" style="width:11%">Std min</th>
+          <th class="num" style="width:9%">Count</th>
+          <th class="num" style="width:12%">Subtotal</th>
+          <th style="width:22%">Status</th>
+        </tr>
+      </thead>
+      <tbody id="routine-body"></tbody>
+      <tfoot>
+        <tr class="total">
+          <td colspan="3">Productive minutes logged</td>
+          <td class="num act-sub" id="act-total">0</td>
+          <td class="mono" id="act-total-note" style="font-size:10px;color:var(--ink-3)">of 480 shift min</td>
+        </tr>
+      </tfoot>
+    </table>
   </section>
 
   <!-- ADMIN + OUTREACH -->
@@ -822,33 +828,6 @@
       <span class="src">carried from SPMC SHARE TC Daily Activity Report</span>
     </div>
     <div class="checks" id="admin-checks"></div>
-  </section>
-
-  <!-- ACTIVITY / TIME LOG -->
-  <section class="sec">
-    <div class="sechead">
-      <h2>Activity &amp; time log</h2>
-      <span class="src" id="act-src">standard minutes &mdash; TC Activities/Services</span>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Activity</th>
-          <th class="num" style="width:11%">Std min</th>
-          <th class="num" style="width:9%">Count</th>
-          <th class="num" style="width:12%">Subtotal</th>
-          <th style="width:22%">Status</th>
-        </tr>
-      </thead>
-      <tbody id="activity-body"></tbody>
-      <tfoot>
-        <tr class="total">
-          <td colspan="3">Productive minutes logged</td>
-          <td class="num act-sub" id="act-total">0</td>
-          <td class="mono" id="act-total-note" style="font-size:10px;color:var(--ink-3)">of 480 shift min</td>
-        </tr>
-      </tfoot>
-    </table>
   </section>
 
   <!-- NARRATIVE -->
@@ -887,7 +866,7 @@
 
   <p class="footnote">
     Record case identifiers or initials only. Full patient names must not appear on this sheet &mdash; Data Privacy Act of 2012 (RA 10173).
-    Time standards from TC Activities/Services; response-time targets from the Davao City Organ Donation Council guidelines (31 July 2026).
+    Daily routine standard minutes are entered by the coordinator, not drawn from a published schedule; Citizen&#39;s Charter times are from the OTSU Citizens Charter 2026.
   </p>
 
   <div class="pagemark">Page 2 of 2 &middot; SHARE&nbsp;TC&nbsp;Daily&nbsp;KPI</div>
@@ -999,61 +978,6 @@
     ["Submission of requirements for enlistment", "60 min", 60]
   ];
 
-  var ACTIVITIES = {
-    CTC: [
-      ["Entry / updating of patient records", 32],
-      ["Coordination: extraction, packaging &amp; send-out", 120],
-      ["Coordination: intra-transplant (OR &amp; ward)", 480],
-      ["Daily rounds", 45],
-      ["Admission of patients", 180],
-      ["OR scheduling", 60],
-      ["Coordination: updating of transplant team", 60],
-      ["Preparation and routing of office documents", 30],
-      ["Charge slips for outsourced labs / diagnostics (NKTI)", 10],
-      ["Linens monitoring / packing / sterilization", 20],
-      ["Short meetings", 30],
-      ["Meetings", 90],
-      ["Reports (preparation, submission)", 120]
-    ],
-    PTC_RN: [
-      ["Procurement functions &mdash; RN", null],
-      ["Identify &amp; refer possible donors", 180],
-      ["Assists in brain death diagnosis", 60],
-      ["Confirm donor suitability", 60],
-      ["Assists in donor maintenance", 180],
-      ["Family approach", 180],
-      ["Organize organ and tissue recovery", 460],
-      ["Prepares organ sharing", 120],
-      ["Support functions", null],
-      ["Hospital staff training", 460],
-      ["Research and development", 120],
-      ["Quality control", 60],
-      ["Reports (preparation, submission)", 120],
-      ["Coordination activities", 120],
-      ["Updating of records", 60],
-      ["Intra-hospital, inter-departmental communication", 60],
-      ["Inter-hospital, external communication", 60]
-    ],
-    PTC_MD: [
-      ["Procurement functions &mdash; MD", null],
-      ["Identify &amp; refer possible donors", 240],
-      ["Assists in brain death diagnosis", 60],
-      ["Confirm donor suitability", 120],
-      ["Donor maintenance", 240],
-      ["Family approach", 0],
-      ["Organize organ and tissue recovery", 240],
-      ["Prepares organ sharing", 120],
-      ["Support functions", null],
-      ["Hospital staff training", 460],
-      ["Research and development", 120],
-      ["Quality control", 60],
-      ["Reports (preparation, submission)", 60],
-      ["Coordination activities", 60],
-      ["Updating of records", 60],
-      ["Intra-hospital, inter-departmental communication", 60],
-      ["Inter-hospital, external communication", 60]
-    ]
-  };
 
   /* the measures on the Master's own Weekly Update and Monthly Update tabs,
      with the 2026 YTD position to 26 July as the reference column */
@@ -1194,15 +1118,16 @@
   }
 
   function buildRoutine() {
-    el("routine-grid").innerHTML = ROUTINE.map(function (r, i) {
-      return "<div class='ritem'>" +
-        "<div class='rrow'>" +
-          "<span class='rnum'>" + (i + 1) + "</span>" +
-          "<span>" + r + "</span>" +
-          "<select class='status' data-routine='" + i + "' data-s=''>" + options(STATUSES) + "</select>" +
-        "</div>" +
-        "<div class='narr' data-narr-routine='" + i + "' hidden></div>" +
-      "</div>";
+    el("routine-body").innerHTML = ROUTINE.map(function (r, i) {
+      return "<tr>" +
+          "<td>" + r + "</td>" +
+          "<td class='num'><input type='number' class='act-count' min='0' step='1' data-r='std' placeholder='0'></td>" +
+          "<td class='num'><input type='number' class='act-count' min='0' step='1' data-r='count' placeholder='0'></td>" +
+          "<td class='num act-sub' data-r='sub'>&mdash;</td>" +
+          "<td><select class='status' data-routine='" + i + "' data-s=''>" + options(STATUSES) + "</select></td>" +
+        "</tr>" +
+        "<tr class='narr-row' data-narr-routine='" + i + "' hidden><td colspan='5' style='border-bottom:1px solid var(--rule);padding:0'>" +
+          "<div class='narr' style='margin-left:4px'></div></td></tr>";
     }).join("");
   }
 
@@ -1218,28 +1143,6 @@
     }).join("");
   }
 
-  function buildActivities() {
-    var role = document.querySelector("input[name=role]:checked").value;
-    var rows = ACTIVITIES[role];
-    var html = "";
-    rows.forEach(function (r, i) {
-      if (r[1] === null) {
-        html += "<tr><td class='actgroup' colspan='5'>" + r[0] + "</td></tr>";
-      } else {
-        html += "<tr data-act='" + i + "'>" +
-          "<td>" + r[0] + "</td>" +
-          "<td class='num mono' style='color:var(--ink-3)' data-std='" + r[1] + "'>" + r[1] + "</td>" +
-          "<td class='num'><input type='number' class='act-count' min='0' step='1' data-f='count' placeholder='0'></td>" +
-          "<td class='num act-sub' data-f='sub'>&mdash;</td>" +
-          "<td><select class='status' data-f='status' data-s=''>" + options(STATUSES) + "</select></td>" +
-        "</tr>" +
-        "<tr class='narr-row' data-narr-act='" + i + "' hidden><td colspan='5' style='border-bottom:1px solid var(--rule);padding:0'>" +
-          "<div class='narr' style='margin-left:4px'></div></td></tr>";
-      }
-    });
-    el("activity-body").innerHTML = html;
-    el("act-src").textContent = "standard minutes for " + role.replace("_", "/") + " - TC Activities/Services";
-  }
 
   /* ---------- day context ---------- */
 
@@ -1311,26 +1214,8 @@
     return out;
   }
 
-  function computeActivities() {
-    var total = 0;
-    Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
-      var std = parseFloat(row.querySelector("[data-std]").getAttribute("data-std"));
-      var c = parseFloat(row.querySelector("[data-f=count]").value);
-      var cell = row.querySelector("[data-f=sub]");
-      if (isNaN(c) || c <= 0) {
-        cell.innerHTML = "&mdash;";
-      } else {
-        var sub = std * c;
-        total += sub;
-        cell.textContent = sub;
-      }
-    });
-    return total;
-  }
-
   /* the Citizen's Charter table is the one place clients-served is entered -
-     its minutes feed the workload index rather than being typed a second time
-     in the activity log, which used to hold a duplicate Charter-services group */
+     its minutes feed the workload index alongside daily routine's own subtotal */
   function charterMinutes() {
     var total = 0;
     Array.prototype.forEach.call(document.querySelectorAll("#charter-body tr"), function (row, i) {
@@ -1340,15 +1225,29 @@
     return total;
   }
 
+  /* std min has no published source for these 18 tasks - the coordinator
+     enters it themselves, unlike Charter's sourced per-service minutes */
   function computeRoutine() {
     var sels = document.querySelectorAll("[data-routine]");
-    var done = 0, applicable = 0;
+    var done = 0, applicable = 0, minutes = 0;
     Array.prototype.forEach.call(sels, function (s) {
       s.setAttribute("data-s", s.value);
       if (s.value === "Completed") { done++; }
       if (s.value && s.value !== "Deferred" && s.value !== "Cancelled") { applicable++; }
+
+      var row = s.closest("tr");
+      var std = parseFloat(row.querySelector("[data-r=std]").value);
+      var c = parseFloat(row.querySelector("[data-r=count]").value);
+      var cell = row.querySelector("[data-r=sub]");
+      if (isNaN(std) || isNaN(c) || c <= 0) {
+        cell.innerHTML = "&mdash;";
+      } else {
+        var sub = std * c;
+        minutes += sub;
+        cell.textContent = sub;
+      }
     });
-    return { done: done, applicable: applicable, total: sels.length };
+    return { done: done, applicable: applicable, total: sels.length, minutes: minutes };
   }
 
   /* DBI - the detection pool, counted per area in the funnel's first stage */
@@ -1643,38 +1542,6 @@
     return out;
   }
 
-  function narrateActivities() {
-    var role = document.querySelector("input[name=role]:checked").value;
-    var rows = ACTIVITIES[role];
-    var out = [], total = 0;
-    Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
-      var i = parseInt(row.getAttribute("data-act"), 10);
-      var c = parseFloat(row.querySelector("[data-f=count]").value);
-      var holder = document.querySelector("[data-narr-act='" + i + "']");
-      if (isNaN(c) || c <= 0) {
-        if (holder) { holder.hidden = true; }
-        return;
-      }
-      var std = parseFloat(row.querySelector("[data-std]").getAttribute("data-std"));
-      var label = softLower(rows[i][0].replace(/&amp;/g, "&").replace(/&mdash;/g, "-"));
-      var status = row.querySelector("[data-f=status]").value;
-      var sub = std * c;
-      total += sub;
-      var s = (c === 1)
-        ? "Logged 1 instance of " + label + " at its standard " + std + " minute" +
-          (std === 1 ? "" : "s") + (status ? ", recorded as " + status.toLowerCase() : "") + "."
-        : "Logged " + c + " instances of " + label + " at a standard " + std + " minute" +
-          (std === 1 ? "" : "s") + " each, " + sub + " minutes in total" +
-          (status ? ", recorded as " + status.toLowerCase() : "") + ".";
-      if (holder) {
-        holder.hidden = false;
-        holder.querySelector(".narr").textContent = s;
-      }
-      out.push(s);
-    });
-    return { items: out, total: total };
-  }
-
   function narrateChecklists() {
     var admin = [];
     var groups = { Completed: [], Ongoing: [], Pending: [], Deferred: [], Cancelled: [] };
@@ -1689,10 +1556,24 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-routine]"), function (sel) {
       var i = parseInt(sel.getAttribute("data-routine"), 10);
       var holder = document.querySelector("[data-narr-routine='" + i + "']");
-      var s = routineSentence(ROUTINE_PHRASE[i], sel.value);
+      var statusSentence = routineSentence(ROUTINE_PHRASE[i], sel.value);
+
+      var row = sel.closest("tr");
+      var std = parseFloat(row.querySelector("[data-r=std]").value);
+      var c = parseFloat(row.querySelector("[data-r=count]").value);
+      var countSentence = "";
+      if (!isNaN(std) && !isNaN(c) && c > 0) {
+        var sub = std * c;
+        countSentence = (c === 1)
+          ? "Logged 1 instance at its standard " + std + " minute" + (std === 1 ? "" : "s") + "."
+          : "Logged " + c + " instances at a standard " + std + " minute" + (std === 1 ? "" : "s") +
+            " each, " + sub + " minutes in total.";
+      }
+      var combined = sentences([statusSentence, countSentence]);
+
       if (holder) {
-        holder.hidden = !s;
-        holder.textContent = s;
+        holder.hidden = !combined;
+        holder.querySelector(".narr").textContent = combined;
       }
       if (groups[sel.value]) { groups[sel.value].push(ROUTINE_PHRASE[i]); }
     });
@@ -1733,7 +1614,6 @@
     var refs    = narrateWm(computeWm());
     var funnel  = narrateFunnel();
     var charter = narrateCharter();
-    var acts    = narrateActivities();
     var others  = el("f-others").value.trim();
 
     var name    = el("f-name").value.trim();
@@ -1770,33 +1650,29 @@
       : "";
     html += para("Citizen&#39;s Charter services", sentences([ccLead].concat(charter)));
 
-    /* --- routine and admin --- */
+    /* --- routine, with its own std-min/count arithmetic spelled out --- */
     var routineText = routineProse(lists.routine);
-    html += para("Daily routine", routineText);
-    html += para("Administration, coordination &amp; outreach", sentences(lists.admin));
-
-    /* --- activity and time log, with the shift arithmetic spelled out --- */
+    var rm = computeRoutine().minutes;
     var cm = charterMinutes();
-    var actText = "";
-    if (acts.items.length || cm) {
-      var actBits = [];
-      if (acts.items.length) {
-        actBits.push("Time was logged against the " + roleKey.replace("_", "/") +
-                     " standard-minute schedule (TC Activities/Services).");
-        actBits = actBits.concat(acts.items);
+    if (rm || cm) {
+      var minBits = [];
+      if (rm) {
+        minBits.push("Daily routine tasks logged " + rm + " minute" + (rm === 1 ? "" : "s") +
+                     " of productive time.");
       }
       if (cm) {
-        actBits.push("Citizen&#39;s Charter services (above) contributed a further " + cm +
-                     " minute" + (cm === 1 ? "" : "s") + " of productive time.");
+        minBits.push("Citizen&#39;s Charter services (above) contributed a further " + cm +
+                     " minute" + (cm === 1 ? "" : "s") + ".");
       }
-      var grandTotal = acts.total + cm;
-      actText = sentences(actBits);
-      actText += " Productive time for the shift totals " + grandTotal + " minute" +
-                 (grandTotal === 1 ? "" : "s") + " against the " + SHIFT_MIN +
-                 "-minute charter shift, a workload index of " +
-                 (grandTotal / SHIFT_MIN).toFixed(2) + ".";
+      var grandTotal = rm + cm;
+      routineText = sentences([routineText].concat(minBits));
+      routineText += " Productive time for the shift totals " + grandTotal + " minute" +
+                     (grandTotal === 1 ? "" : "s") + " against the " + SHIFT_MIN +
+                     "-minute charter shift, a workload index of " +
+                     (grandTotal / SHIFT_MIN).toFixed(2) + ".";
     }
-    html += para("Activity &amp; time log", actText);
+    html += para("Daily routine", routineText);
+    html += para("Administration, coordination &amp; outreach", sentences(lists.admin));
 
     /* --- free text, kept verbatim --- */
     if (others) {
@@ -1804,7 +1680,7 @@
     }
 
     if (!dbiText && !refs.length && !funnel && !charter.length && !routineText &&
-        !lists.admin.length && !acts.items.length && !others) {
+        !lists.admin.length && !others) {
       html = "<p class='empty'>Nothing logged yet. Tick a task, set a status, or enter a count and its narrative appears here automatically.</p>";
     }
 
@@ -1812,21 +1688,16 @@
   }
 
   function compute() {
-    var mins = computeActivities() + charterMinutes();
-    computeRoutine();
+    var routine = computeRoutine();
+    var mins = routine.minutes + charterMinutes();
     computeFunnel(computeDbi());
     computeWm();
     renderPeriod();
 
-    /* the activity table's own running total, at the foot of page 2 */
+    /* the daily routine table's own running total, at its foot */
     el("act-total").textContent = mins;
     el("act-total-note").textContent = "of " + SHIFT_MIN + " shift min / index " +
                                        (mins / SHIFT_MIN).toFixed(2);
-
-    /* status chip colours in the activity table */
-    Array.prototype.forEach.call(document.querySelectorAll("[data-f=status]"), function (s) {
-      s.setAttribute("data-s", s.value);
-    });
 
     renderNarrative();
   }
@@ -1838,7 +1709,7 @@
   }
 
   function collect() {
-    var data = { fields: {}, wm: {}, acts: [], routine: [], admin: [], charter: [] };
+    var data = { fields: {}, wm: {}, routine: [], admin: [], charter: [] };
 
     ["f-date", "f-name", "f-others", "fn-referrals", "fn-eligible", "fn-bd",
      "fn-approached", "fn-consented", "fn-donors"]
@@ -1853,15 +1724,13 @@
     });
 
 
-    Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
-      data.acts.push({
-        count: row.querySelector("[data-f=count]").value,
-        status: row.querySelector("[data-f=status]").value
+    Array.prototype.forEach.call(document.querySelectorAll("[data-routine]"), function (sel) {
+      var row = sel.closest("tr");
+      data.routine.push({
+        std: row.querySelector("[data-r=std]").value,
+        count: row.querySelector("[data-r=count]").value,
+        status: sel.value
       });
-    });
-
-    Array.prototype.forEach.call(document.querySelectorAll("[data-routine]"), function (s) {
-      data.routine.push(s.value);
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-admin]"), function (c) {
       data.admin.push(c.checked);
@@ -1885,7 +1754,7 @@
     });
     if (data.fields && data.fields.role) {
       var r = document.querySelector("input[name=role][value=" + data.fields.role + "]");
-      if (r) { r.checked = true; buildActivities(); }
+      if (r) { r.checked = true; }
     }
 
     Object.keys(data.wm || {}).forEach(function (k) {
@@ -1896,15 +1765,19 @@
       if (c) { c.value = data.wm[k]; }
     });
 
-    var actRows = document.querySelectorAll("[data-act]");
-    (data.acts || []).forEach(function (o, i) {
-      if (!actRows[i]) { return; }
-      actRows[i].querySelector("[data-f=count]").value = o.count;
-      actRows[i].querySelector("[data-f=status]").value = o.status;
-    });
-
     var rSels = document.querySelectorAll("[data-routine]");
-    (data.routine || []).forEach(function (v, i) { if (rSels[i]) { rSels[i].value = v; } });
+    (data.routine || []).forEach(function (v, i) {
+      if (!rSels[i]) { return; }
+      var row = rSels[i].closest("tr");
+      if (v && typeof v === "object") {
+        row.querySelector("[data-r=std]").value = v.std || "";
+        row.querySelector("[data-r=count]").value = v.count || "";
+        rSels[i].value = v.status || "";
+      } else {
+        /* a day saved before std min / count existed on Daily Routine */
+        rSels[i].value = v || "";
+      }
+    });
 
     var aChk = document.querySelectorAll("[data-admin]");
     (data.admin || []).forEach(function (v, i) { if (aChk[i]) { aChk[i].checked = v; } });
@@ -1953,7 +1826,6 @@
   buildCharter();
   buildRoutine();
   buildAdmin();
-  buildActivities();
 
   var today = new Date();
   el("f-date").value = today.getFullYear() + "-" +
@@ -1971,7 +1843,6 @@
   });
 
   document.addEventListener("change", function (e) {
-    if (e.target.name === "role") { buildActivities(); }
     compute();
   });
 
