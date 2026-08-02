@@ -333,42 +333,6 @@
     white-space: nowrap;
   }
 
-  /* ---------- KPI band ---------- */
-  .kpiband {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border: 1px solid var(--rule-strong);
-  }
-  .kpi { padding: 8px 10px 9px; border-right: 1px solid var(--rule); }
-  .kpi:last-child { border-right: 0; }
-  .kpi .k-lbl {
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-  }
-  .kpi .k-val {
-    font-family: var(--mono);
-    font-variant-numeric: tabular-nums;
-    font-size: 25px;
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -.02em;
-    margin-top: 3px;
-  }
-  .kpi .k-val .unit { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 1px; }
-  .kpi .k-sub {
-    font: 500 9px/1.3 var(--mono);
-    color: var(--ink-3);
-    margin-top: 2px;
-  }
-  .kpi[data-state="ok"] .k-val { color: var(--ok); }
-  .kpi[data-state="warn"] .k-val { color: var(--warn); }
-  .kpi[data-state="crit"] .k-val { color: var(--crit); }
-  .kpi[data-state="crit"] { box-shadow: inset 3px 0 0 var(--crit); }
-  .kpi[data-state="warn"] { box-shadow: inset 3px 0 0 var(--warn); }
-
   /* ---------- tables ---------- */
   table { width: 100%; border-collapse: collapse; }
   th {
@@ -417,67 +381,40 @@
     margin: 4px 0 0;
   }
 
-  /* ---------- DBI live counters ---------- */
-  .livegrid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);   /* one row - page 1 is tight */
-    border: 1px solid var(--rule-strong);
-  }
-  .lstat {
-    padding: 7px 6px 9px;
-    border-right: 1px solid var(--rule);
-    text-align: center;
-  }
-  .lstat:last-child { border-right: 0; }
-  .lstat.auto { background: var(--band); }
-  .lstat[data-state="crit"] { box-shadow: inset 3px 0 0 var(--crit); }
-  .lstat .l-lbl {
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    display: block;
-    min-height: 20px;
-  }
-  .lstat .l-val { font: 600 20px/1.2 var(--sans); color: var(--ink); margin-top: 2px; }
-  .lstat .l-row {
+  /* ---------- DBI per-area entry, inside the funnel's first stage ---------- */
+  .f-areas {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 5px;
-    margin-top: 2px;
+    gap: 6px;
+    margin: 3px 0 1px;
   }
-  .lstat .l-row input {
-    width: 46px;
+  .f-areas label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+  .f-areas span {
+    font: 700 7.5px/1 var(--sans);
+    letter-spacing: .08em;
+    color: var(--ink-3);
+  }
+  .f-areas input {
+    width: 38px;
     text-align: center;
-    font: 600 20px/1.2 var(--sans);
-    padding: 1px 2px;
+    font-size: 12px;
+    padding: 2px;
   }
-  .step {
-    font: 600 15px/1 var(--sans);
-    width: 26px;
-    height: 28px;
-    flex: 0 0 auto;
-    color: var(--ink);
-    background: var(--paper);
-    border: 1px solid var(--rule-strong);
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  .step:hover { border-color: var(--accent); color: var(--accent); }
-  .step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .fstage { padding: 7px 8px 8px; border-right: 1px solid var(--rule); text-align: center; }
-  .fstage:nth-child(4n) { border-right: 0; }
-  .fstage:nth-child(n+5) { border-top: 1px solid var(--rule); }
-  /* the two DBI stages are derived from the log above, not typed */
-  .fstage.auto { background: var(--band); }
+  /* the derived total sits under the two area boxes */
   .fstage .f-val {
     font: 600 15px/1.2 var(--sans);
     color: var(--ink);
-    margin: 3px auto 0;
-    padding: 4px 2px;
+    margin: 2px auto 0;
   }
+  .fstage[data-state="crit"] { box-shadow: inset 3px 0 0 var(--crit); }
+  .fstage { padding: 7px 8px 8px; border-right: 1px solid var(--rule); text-align: center; }
+  .fstage:nth-child(4n) { border-right: 0; }
+  .fstage:nth-child(n+5) { border-top: 1px solid var(--rule); }
   .fstage .f-lbl {
     font-size: 8px;
     font-weight: 700;
@@ -655,10 +592,8 @@
     input[type="checkbox"] { -webkit-appearance: none; appearance: none; border: 1px solid #444; }
     input[type="checkbox"]:checked::after { content: "\2715"; display: block; font-size: 10px; line-height: 10px; text-align: center; }
     select { -webkit-appearance: none; appearance: none; }
-    .sec, .kpiband, .funnel, tr { page-break-inside: avoid; }
-    .kpi[data-state="crit"], .kpi[data-state="warn"] { box-shadow: none; }
-    .kpi[data-state="crit"] { border-left: 3px solid var(--crit); }
-    .kpi[data-state="warn"] { border-left: 3px solid var(--warn); }
+    .sec, .funnel, tr { page-break-inside: avoid; }
+    .fstage[data-state="crit"] { box-shadow: none; border-left: 3px solid var(--crit); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -667,20 +602,14 @@
 
   @media (max-width: 8.9in) {
     .sheet { width: 100%; padding: 18px; }
-    .kpiband { grid-template-columns: repeat(2, 1fr); }
-    .kpi:nth-child(2) { border-right: 0; }
-    .kpi:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
     .identity { grid-template-columns: 1fr 1fr; }
     .idcell:nth-child(3) { border-left: 0; }
     .routine, .checks { grid-template-columns: 1fr; }
-    .funnel { grid-template-columns: repeat(3, 1fr); }
-    /* six counters across is unusable on a phone - go two up */
-    .livegrid { grid-template-columns: repeat(2, 1fr); }
-    .lstat:nth-child(2n) { border-right: 0; }
-    .lstat:not(:nth-child(-n+2)) { border-top: 1px solid var(--rule); }
-    /* thumb-sized steppers */
-    .step { width: 34px; height: 34px; font-size: 17px; }
-    .lstat .l-row input { width: 54px; }
+    .funnel { grid-template-columns: repeat(2, 1fr); }
+    .fstage:nth-child(n+3) { border-top: 1px solid var(--rule); }
+    .fstage:nth-child(2n) { border-right: 0; }
+    .fstage:nth-child(4n) { border-right: 1px solid var(--rule); }
+    .fstage:nth-child(2n) { border-right: 0; }
     /* the source captions are nowrap and were pushing the page sideways */
     .sechead { flex-wrap: wrap; }
     .sechead .src { margin-left: 0; flex: 1 1 100%; white-space: normal; }
@@ -762,87 +691,6 @@
     </div>
   </div>
 
-  <!-- KPI BAND -->
-  <section class="sec">
-    <div class="sechead">
-      <h2>Daily performance summary</h2>
-      <span class="src">auto-computed from the entries below</span>
-    </div>
-    <div class="kpiband">
-      <div class="kpi" id="kpi-sla" data-state="idle">
-        <span class="k-lbl">Referral rate</span>
-        <div class="k-val" id="kpi-sla-val">&mdash;</div>
-        <div class="k-sub" id="kpi-sla-sub">no DBI cases logged</div>
-      </div>
-      <div class="kpi" id="kpi-ref" data-state="idle">
-        <span class="k-lbl">Potential donors today</span>
-        <div class="k-val" id="kpi-ref-val">0</div>
-        <div class="k-sub" id="kpi-ref-sub">25 potential in 2026 YTD</div>
-      </div>
-      <div class="kpi" id="kpi-load" data-state="idle">
-        <span class="k-lbl">Workload index</span>
-        <div class="k-val" id="kpi-load-val">0.00</div>
-        <div class="k-sub" id="kpi-load-sub">0 of 480 shift min</div>
-      </div>
-      <div class="kpi" id="kpi-routine" data-state="idle">
-        <span class="k-lbl">Routine completion</span>
-        <div class="k-val" id="kpi-routine-val">0<span class="unit">%</span></div>
-        <div class="k-sub" id="kpi-routine-sub">0 of 16 completed</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- DBI MONITORING -->
-  <section class="sec">
-    <div class="sechead">
-      <h2>Devastating brain injury (DBI) monitoring &mdash; ER &amp; ICU</h2>
-      <span class="src">detection pool above referral &middot; criteria pending OTSU sign-off</span>
-    </div>
-    <div class="livegrid">
-      <div class="lstat">
-        <span class="l-lbl">Identified &mdash; ER</span>
-        <div class="l-row">
-          <button type="button" class="step no-print" data-step="dbi-er:-1" aria-label="ER identified, subtract one">&minus;</button>
-          <input type="number" min="0" step="1" id="dbi-er" placeholder="0">
-          <button type="button" class="step no-print" data-step="dbi-er:1" aria-label="ER identified, add one">+</button>
-        </div>
-      </div>
-      <div class="lstat">
-        <span class="l-lbl">Identified &mdash; ICU</span>
-        <div class="l-row">
-          <button type="button" class="step no-print" data-step="dbi-icu:-1" aria-label="ICU identified, subtract one">&minus;</button>
-          <input type="number" min="0" step="1" id="dbi-icu" placeholder="0">
-          <button type="button" class="step no-print" data-step="dbi-icu:1" aria-label="ICU identified, add one">+</button>
-        </div>
-      </div>
-      <div class="lstat auto">
-        <span class="l-lbl">Total identified</span>
-        <div class="l-val" id="dbi-found">0</div>
-      </div>
-      <div class="lstat" id="lstat-ref">
-        <span class="l-lbl">Referred to SHARE</span>
-        <div class="l-row">
-          <button type="button" class="step no-print" data-step="dbi-referred:-1" aria-label="Referred, subtract one">&minus;</button>
-          <input type="number" min="0" step="1" id="dbi-referred" placeholder="0">
-          <button type="button" class="step no-print" data-step="dbi-referred:1" aria-label="Referred, add one">+</button>
-        </div>
-      </div>
-      <div class="lstat auto">
-        <span class="l-lbl">Not referred</span>
-        <div class="l-val" id="dbi-notref">0</div>
-      </div>
-      <div class="lstat auto">
-        <span class="l-lbl">Referral rate</span>
-        <div class="l-val" id="dbi-rate">&mdash;</div>
-      </div>
-    </div>
-    <p class="funnote">
-      Tally as cases are found: the totals, the not-referred count and the referral rate update as you go.
-      Referral rate separates a detection problem from a conversation problem.
-      DBI criteria need OTSU sign-off &mdash; GCS&nbsp;&lt;&nbsp;7 is the sourced referral trigger, not a DBI definition.
-    </p>
-  </section>
-
   <!-- WEEKLY / MONTHLY UPDATE -->
   <section class="sec">
     <div class="sechead">
@@ -874,14 +722,18 @@
       <span class="src">stages and vocabulary mirror the POMD Referral Master 2026 dashboard</span>
     </div>
     <div class="funnel">
-      <div class="fstage auto">
+      <div class="fstage">
         <span class="f-lbl">DBI identified</span>
+        <div class="f-areas">
+          <label><span>ER</span><input type="number" min="0" step="1" id="dbi-er" placeholder="0"></label>
+          <label><span>ICU</span><input type="number" min="0" step="1" id="dbi-icu" placeholder="0"></label>
+        </div>
         <div class="f-val" id="fn-dbi">0</div>
         <div class="f-rate">&nbsp;</div>
       </div>
-      <div class="fstage auto">
+      <div class="fstage" id="fstage-dbiref">
         <span class="f-lbl">Referred to SHARE</span>
-        <div class="f-val" id="fn-dbiref">0</div>
+        <input type="number" min="0" step="1" id="dbi-referred" placeholder="0">
         <div class="f-rate" id="rate-dbiref">&nbsp;</div>
       </div>
       <div class="fstage">
@@ -1046,7 +898,6 @@
   "use strict";
 
   var SHIFT_MIN = 480;          // 07:00-15:00
-  var REF_BASE  = 1;            // 25 potential donors in 2026 YTD - roughly 1 every 8 days
 
   var STATUSES = ["", "Completed", "Ongoing", "Pending", "Deferred", "Cancelled"];
 
@@ -1350,18 +1201,6 @@
     el("wm-th-month").textContent = MONTHS[+p[1] - 1].slice(0, 3) + " " + p[0];
   }
 
-  /* the +/- buttons beside each counter */
-  function stepCounter(spec) {
-    var parts = spec.split(":");
-    var box = el(parts[0]);
-    if (!box) { return; }
-    var v = parseFloat(box.value);
-    if (isNaN(v)) { v = 0; }
-    v += parseFloat(parts[1]);
-    box.value = Math.max(0, v);
-    compute();
-  }
-
   function buildCharter() {
     el("charter-body").innerHTML = CHARTER.map(function (r) {
       return "<tr>" +
@@ -1465,13 +1304,6 @@
 
   /* ---------- compute ---------- */
 
-  function setKpi(id, state, val, sub) {
-    var box = el(id);
-    box.setAttribute("data-state", state);
-    el(id + "-val").innerHTML = val;
-    el(id + "-sub").innerHTML = sub;
-  }
-
   function wmVal(key, period) {
     var row = document.querySelector("[data-wm='" + key + "']");
     if (!row) { return 0; }
@@ -1527,21 +1359,14 @@
     return { done: done, applicable: applicable, total: sels.length };
   }
 
-  /* DBI monitoring - the detection pool, tallied live from three counters */
+  /* DBI - the detection pool, counted per area in the funnel's first stage */
   function computeDbi() {
     var er = num("dbi-er"), icu = num("dbi-icu"), referred = num("dbi-referred");
     var found = er + icu;
-    var notReferred = Math.max(0, found - referred);
-    var rate = pct(referred, found);
-
-    el("dbi-found").textContent = found;
-    el("dbi-notref").textContent = notReferred;
-    el("dbi-rate").innerHTML = (rate === null) ? "&mdash;" : rate + "%";
-
-    /* more referred than identified is a counting error, not a 100%+ rate */
-    el("lstat-ref").setAttribute("data-state", referred > found ? "crit" : "");
-
-    return { er: er, icu: icu, found: found, referred: referred, notReferred: notReferred };
+    return {
+      er: er, icu: icu, found: found, referred: referred,
+      notReferred: Math.max(0, found - referred)
+    };
   }
 
   function computeFunnel(dbi) {
@@ -1553,10 +1378,12 @@
       el(id).innerHTML = (p === null) ? "&nbsp;" : label + " " + p + "%";
     };
 
-    /* the two leading stages mirror the DBI log rather than taking typed input */
+    /* DBI identified is the sum of the per-area boxes above it */
     el("fn-dbi").textContent = dbi.found;
-    el("fn-dbiref").textContent = dbi.referred;
     show("rate-dbiref", "ref.", dbi.referred, dbi.found);
+
+    /* more referred than identified is a counting error, not a 100%+ rate */
+    el("fstage-dbiref").setAttribute("data-state", dbi.referred > dbi.found ? "crit" : "");
     show("rate-potential", "pot.", r, dbi.referred);
 
     show("rate-eligible", "elig.", e, r);
@@ -1983,39 +1810,15 @@
 
   function compute() {
     var mins = computeActivities();
-    var routine = computeRoutine();
-    var dbi = computeDbi();
-    var funnelRefs = computeFunnel(dbi);
+    computeRoutine();
+    computeFunnel(computeDbi());
     computeWm();
     renderPeriod();
 
-    /* referral rate - DBI identified that reached SHARE */
-    if (!dbi.found) {
-      setKpi("kpi-sla", "idle", "&mdash;", "no DBI cases logged");
-    } else {
-      var p = Math.round((dbi.referred / dbi.found) * 100);
-      var state = p === 100 ? "ok" : (p >= 80 ? "warn" : "crit");
-      setKpi("kpi-sla", state, p + "<span class='unit'>%</span>",
-             dbi.referred + " of " + dbi.found + " DBI referred");
-    }
-
-    /* referrals */
-    var refCount = funnelRefs;
-    var refState = refCount === 0 ? "idle" : (refCount >= REF_BASE ? "ok" : "warn");
-    setKpi("kpi-ref", refState, String(refCount), "25 potential in 2026 YTD");
-
-    /* workload */
-    var idx = mins / SHIFT_MIN;
-    var loadState = mins === 0 ? "idle" : (idx > 1.15 ? "crit" : (idx >= 0.6 ? "ok" : "warn"));
-    setKpi("kpi-load", loadState, idx.toFixed(2), mins + " of " + SHIFT_MIN + " shift min");
+    /* the activity table's own running total, at the foot of page 2 */
     el("act-total").textContent = mins;
-    el("act-total-note").textContent = "of " + SHIFT_MIN + " shift min / index " + idx.toFixed(2);
-
-    /* routine */
-    var rp = routine.total ? Math.round((routine.done / routine.total) * 100) : 0;
-    var rState = routine.done === 0 ? "idle" : (rp >= 80 ? "ok" : (rp >= 50 ? "warn" : "crit"));
-    setKpi("kpi-routine", rState, rp + "<span class='unit'>%</span>",
-           routine.done + " of " + routine.total + " completed");
+    el("act-total-note").textContent = "of " + SHIFT_MIN + " shift min / index " +
+                                       (mins / SHIFT_MIN).toFixed(2);
 
     /* status chip colours in the activity table */
     Array.prototype.forEach.call(document.querySelectorAll("[data-f=status]"), function (s) {
@@ -2167,11 +1970,6 @@
   document.addEventListener("change", function (e) {
     if (e.target.name === "role") { buildActivities(); }
     compute();
-  });
-
-  document.addEventListener("click", function (e) {
-    var btn = e.target.closest ? e.target.closest("[data-step]") : null;
-    if (btn) { stepCounter(btn.getAttribute("data-step")); }
   });
 
   el("btn-import").addEventListener("click", runImport);
