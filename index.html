@@ -974,6 +974,27 @@
     }
   }
 
+  /* the four research-project routine rows, identified by name rather than
+     a fixed index so the sentence stays correct if the routine list is reordered */
+  var RESEARCH_NAMES = ["Opt-IN", "Neuro ABC", "Crit Care", "EMR-DAS"];
+
+  function researchProjectName(i) {
+    var label = ROUTINE[i];
+    var hit = RESEARCH_NAMES.filter(function (n) { return label.indexOf(n) === 0; })[0];
+    return hit || null;
+  }
+
+  /* while Ongoing, all four are in the same real phase - state it once rather
+     than the generic "is ongoing and carries over to the next shift" line */
+  function researchPrepSentence(names) {
+    if (!names.length) { return ""; }
+    var subj = listPhrase(names) + " research project" + (names.length === 1 ? "" : "s");
+    var verb = names.length === 1 ? "remains" : "remain";
+    return "The " + subj + " " + verb + " in the preparation phase: compliance of documents and " +
+           "requirements, extensive planning and coordination, and development of the tools each " +
+           "study will use.";
+  }
+
   var CHARTER = [
     ["General inquiry", "20 min", 20],
     ["KT orientation", "200 min", 200],
@@ -1557,10 +1578,17 @@
       if (chk.checked) { admin.push(ADMIN[i][2]); }
     });
 
+    var researchOngoing = [];
+
     Array.prototype.forEach.call(document.querySelectorAll("[data-routine]"), function (sel) {
       var i = parseInt(sel.getAttribute("data-routine"), 10);
       var holder = document.querySelector("[data-narr-routine='" + i + "']");
-      var statusSentence = routineSentence(ROUTINE_PHRASE[i], sel.value);
+      var research = researchProjectName(i);
+      var isPrep = research && sel.value === "Ongoing";
+
+      var statusSentence = isPrep
+        ? researchPrepSentence([research])
+        : routineSentence(ROUTINE_PHRASE[i], sel.value);
 
       var row = sel.closest("tr");
       var std = parseFloat(row.querySelector("[data-r=std]").value);
@@ -1579,15 +1607,20 @@
         holder.hidden = !combined;
         holder.querySelector(".narr").textContent = combined;
       }
-      if (groups[sel.value]) { groups[sel.value].push(ROUTINE_PHRASE[i]); }
+
+      if (isPrep) {
+        researchOngoing.push(research);
+      } else if (groups[sel.value]) {
+        groups[sel.value].push(ROUTINE_PHRASE[i]);
+      }
     });
 
-    return { admin: admin, routine: groups };
+    return { admin: admin, routine: groups, researchOngoing: researchOngoing };
   }
 
-  /* the 16 routine items collapse by status so the paragraph reads as prose,
-     not as sixteen near-identical sentences */
-  function routineProse(g) {
+  /* the routine items collapse by status so the paragraph reads as prose,
+     not as one near-identical sentence per task */
+  function routineProse(g, researchOngoing) {
     var out = [];
     var many = function (list) { return list.length !== 1; };
 
@@ -1609,6 +1642,9 @@
     if (g.Cancelled.length) {
       out.push(capFirst(listPhrase(g.Cancelled)) + (many(g.Cancelled) ? " were" : " was") +
                " cancelled for the day.");
+    }
+    if (researchOngoing && researchOngoing.length) {
+      out.push(researchPrepSentence(researchOngoing));
     }
     return sentences(out);
   }
@@ -1655,7 +1691,7 @@
     html += para("Citizen&#39;s Charter services", sentences([ccLead].concat(charter)));
 
     /* --- routine, with its own std-min/count arithmetic spelled out --- */
-    var routineText = routineProse(lists.routine);
+    var routineText = routineProse(lists.routine, lists.researchOngoing);
     var rm = computeRoutine().minutes;
     var cm = charterMinutes();
     if (rm || cm) {
