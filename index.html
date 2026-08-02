@@ -246,7 +246,7 @@
     margin-bottom: 4px;
   }
 
-  input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
+  input[type="text"], input[type="date"], input[type="number"], select, textarea {
     font-family: var(--sans);
     font-size: 12.5px;
     color: var(--ink);
@@ -257,7 +257,7 @@
     width: 100%;
     box-sizing: border-box;
   }
-  input[type="time"], input[type="number"], input[type="date"] {
+  input[type="number"], input[type="date"] {
     font-family: var(--mono);
     font-variant-numeric: tabular-nums;
     font-size: 12px;
@@ -779,7 +779,7 @@
   <section class="sec">
     <div class="sechead">
       <h2>Citizen&#39;s Charter services delivered</h2>
-      <span class="src">OTSU Citizens Charter 2026 &middot; office hours 07:00&ndash;15:00, Mon&ndash;Fri</span>
+      <span class="src">OTSU Citizens Charter 2026 &middot; office hours 7:00 AM&ndash;3:00 PM, Mon&ndash;Fri</span>
     </div>
     <table>
       <thead>
@@ -897,7 +897,7 @@
 (function () {
   "use strict";
 
-  var SHIFT_MIN = 480;          // 07:00-15:00
+  var SHIFT_MIN = 480;          // 7:00 AM - 3:00 PM
 
   var STATUSES = ["", "Completed", "Ongoing", "Pending", "Deferred", "Cancelled"];
 
@@ -1086,23 +1086,6 @@
     return list.map(function (o) {
       return '<option value="' + o + '">' + (o || "&mdash;") + "</option>";
     }).join("");
-  }
-
-  function toMinutes(v) {
-    if (!v) { return null; }
-    var p = v.split(":");
-    if (p.length !== 2) { return null; }
-    var h = parseInt(p[0], 10), m = parseInt(p[1], 10);
-    if (isNaN(h) || isNaN(m)) { return null; }
-    return h * 60 + m;
-  }
-
-  function delta(a, b) {
-    var x = toMinutes(a), y = toMinutes(b);
-    if (x === null || y === null) { return null; }
-    var d = y - x;
-    if (d < 0) { d += 1440; }          // crossed midnight
-    return d;
   }
 
   function num(id) {
@@ -1758,7 +1741,7 @@
         : "no fixed unit activity scheduled";
       html += "<p><strong>" + esc(name || "The transplant coordinator") + "</strong>, " +
               role + ", on duty" + (date ? " on " + date : "") +
-              " for the 07:00&ndash;15:00 charter shift of " + SHIFT_MIN + " minutes. " +
+              " for the 7:00 AM&ndash;3:00 PM charter shift of " + SHIFT_MIN + " minutes. " +
               "Scheduled context for the day: " + ctx + ".</p>";
     }
 
