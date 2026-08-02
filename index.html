@@ -246,7 +246,7 @@
     margin-bottom: 4px;
   }
 
-  input[type="text"], input[type="date"], input[type="number"], select, textarea {
+  input[type="text"], input[type="date"], input[type="number"], input[type="time"], select, textarea {
     font-family: var(--sans);
     font-size: 12.5px;
     color: var(--ink);
@@ -257,7 +257,7 @@
     width: 100%;
     box-sizing: border-box;
   }
-  input[type="number"], input[type="date"] {
+  input[type="number"], input[type="date"], input[type="time"] {
     font-family: var(--mono);
     font-variant-numeric: tabular-nums;
     font-size: 12px;
@@ -809,10 +809,12 @@
       <thead>
         <tr>
           <th>Task</th>
-          <th class="num" style="width:11%">Std min</th>
-          <th class="num" style="width:9%">Count</th>
-          <th class="num" style="width:12%">Subtotal</th>
-          <th style="width:22%">Status</th>
+          <th class="num" style="width:9%">Std min</th>
+          <th class="num" style="width:7%">Count</th>
+          <th class="num" style="width:9%">Subtotal</th>
+          <th class="num" style="width:11%">Started</th>
+          <th class="num" style="width:11%">Ended</th>
+          <th style="width:17%">Status</th>
         </tr>
       </thead>
       <tbody id="routine-body"></tbody>
@@ -820,10 +822,13 @@
         <tr class="total">
           <td colspan="3">Productive minutes logged</td>
           <td class="num act-sub" id="act-total">0</td>
-          <td class="mono" id="act-total-note" style="font-size:10px;color:var(--ink-3)">of 480 shift min</td>
+          <td colspan="3" class="mono" id="act-total-note" style="font-size:10px;color:var(--ink-3)">of 480 shift min</td>
         </tr>
       </tfoot>
     </table>
+    <p class="funnote">
+      Ended is calculated from Started plus Std min, and is left blank while Status is Ongoing.
+    </p>
   </section>
 
   <!-- ADMIN + OUTREACH -->
@@ -1176,9 +1181,11 @@
           "<td class='num'><input type='number' class='act-count' min='0' step='1' data-r='std' placeholder='0'></td>" +
           "<td class='num'><input type='number' class='act-count' min='0' step='1' data-r='count' placeholder='0'></td>" +
           "<td class='num act-sub' data-r='sub'>&mdash;</td>" +
+          "<td class='num'><input type='time' data-r='start'></td>" +
+          "<td class='num mono' data-r='end'>&mdash;</td>" +
           "<td><select class='status' data-routine='" + i + "' data-s=''>" + options(STATUSES) + "</select></td>" +
         "</tr>" +
-        "<tr class='narr-row' data-narr-routine='" + i + "' hidden><td colspan='5' style='border-bottom:1px solid var(--rule);padding:0'>" +
+        "<tr class='narr-row' data-narr-routine='" + i + "' hidden><td colspan='7' style='border-bottom:1px solid var(--rule);padding:0'>" +
           "<div class='narr' style='margin-left:4px'></div></td></tr>";
     }).join("");
   }
@@ -1279,6 +1286,24 @@
 
   /* std min has no published source for these 18 tasks - the coordinator
      enters it themselves, unlike Charter's sourced per-service minutes */
+  /* "HH:MM" (native time input, 24h internally regardless of display) -> minutes since midnight */
+  function clockToMinutes(hhmm) {
+    if (!hhmm) { return null; }
+    var p = hhmm.split(":");
+    var h = parseInt(p[0], 10), m = parseInt(p[1], 10);
+    if (isNaN(h) || isNaN(m)) { return null; }
+    return h * 60 + m;
+  }
+
+  /* minutes since midnight -> "h:MM AM/PM", wrapping past midnight if a task runs overnight */
+  function minutesToClock12(total) {
+    total = ((total % 1440) + 1440) % 1440;
+    var h = Math.floor(total / 60), m = total % 60;
+    var ampm = h < 12 ? "AM" : "PM";
+    var h12 = h % 12; if (h12 === 0) { h12 = 12; }
+    return h12 + ":" + ("0" + m).slice(-2) + " " + ampm;
+  }
+
   function computeRoutine() {
     var sels = document.querySelectorAll("[data-routine]");
     var done = 0, applicable = 0, minutes = 0;
@@ -1297,6 +1322,15 @@
         var sub = std * c;
         minutes += sub;
         cell.textContent = sub;
+      }
+
+      /* Ended = Started + Std min, left blank while Ongoing or if either input is missing */
+      var endCell = row.querySelector("[data-r=end]");
+      var startMin = clockToMinutes(row.querySelector("[data-r=start]").value);
+      if (s.value === "Ongoing" || startMin === null || isNaN(std)) {
+        endCell.innerHTML = "&mdash;";
+      } else {
+        endCell.textContent = minutesToClock12(startMin + std);
       }
     });
     return { done: done, applicable: applicable, total: sels.length, minutes: minutes };
@@ -1627,7 +1661,17 @@
           ? "Logged 1 time, " + formatDuration(std) + "."
           : "Logged " + c + " times, " + formatDuration(std) + " each, " + formatDuration(sub) + " total.";
       }
-      var combined = sentences([statusSentence, countSentence]);
+
+      var timeSentence = "";
+      var startMin = clockToMinutes(row.querySelector("[data-r=start]").value);
+      if (startMin !== null) {
+        var endText = row.querySelector("[data-r=end]").textContent;
+        timeSentence = (endText && endText !== "—")
+          ? "Started at " + minutesToClock12(startMin) + ", ended at " + endText + "."
+          : "Started at " + minutesToClock12(startMin) + ".";
+      }
+
+      var combined = sentences([statusSentence, countSentence, timeSentence]);
 
       if (holder) {
         holder.hidden = !combined;
@@ -1758,7 +1802,8 @@
       var row = sel.closest("tr");
       var std = row.querySelector("[data-r=std]").value.trim();
       var count = row.querySelector("[data-r=count]").value.trim();
-      var empty = !sel.value && !std && !count;
+      var start = row.querySelector("[data-r=start]").value.trim();
+      var empty = !sel.value && !std && !count && !start;
       row.setAttribute("data-empty", empty ? "1" : "");
     });
 
@@ -1822,6 +1867,7 @@
       data.routine.push({
         std: row.querySelector("[data-r=std]").value,
         count: row.querySelector("[data-r=count]").value,
+        start: row.querySelector("[data-r=start]").value,
         status: sel.value
       });
     });
@@ -1865,6 +1911,7 @@
       if (v && typeof v === "object") {
         row.querySelector("[data-r=std]").value = v.std || "";
         row.querySelector("[data-r=count]").value = v.count || "";
+        row.querySelector("[data-r=start]").value = v.start || "";
         rSels[i].value = v.status || "";
       } else {
         /* a day saved before std min / count existed on Daily Routine */
