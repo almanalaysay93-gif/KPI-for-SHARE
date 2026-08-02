@@ -417,8 +417,56 @@
     margin: 4px 0 0;
   }
 
-  /* ---------- DBI inline stat line ---------- */
-  .dbistat strong { color: var(--ink); font-weight: 700; }
+  /* ---------- DBI live counters ---------- */
+  .livegrid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);   /* one row - page 1 is tight */
+    border: 1px solid var(--rule-strong);
+  }
+  .lstat {
+    padding: 7px 6px 9px;
+    border-right: 1px solid var(--rule);
+    text-align: center;
+  }
+  .lstat:last-child { border-right: 0; }
+  .lstat.auto { background: var(--band); }
+  .lstat[data-state="crit"] { box-shadow: inset 3px 0 0 var(--crit); }
+  .lstat .l-lbl {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: block;
+    min-height: 20px;
+  }
+  .lstat .l-val { font: 600 20px/1.2 var(--sans); color: var(--ink); margin-top: 2px; }
+  .lstat .l-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 2px;
+  }
+  .lstat .l-row input {
+    width: 46px;
+    text-align: center;
+    font: 600 20px/1.2 var(--sans);
+    padding: 1px 2px;
+  }
+  .step {
+    font: 600 15px/1 var(--sans);
+    width: 26px;
+    height: 28px;
+    flex: 0 0 auto;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .step:hover { border-color: var(--accent); color: var(--accent); }
+  .step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .fstage { padding: 7px 8px 8px; border-right: 1px solid var(--rule); text-align: center; }
   .fstage:nth-child(4n) { border-right: 0; }
   .fstage:nth-child(n+5) { border-top: 1px solid var(--rule); }
@@ -626,6 +674,16 @@
     .idcell:nth-child(3) { border-left: 0; }
     .routine, .checks { grid-template-columns: 1fr; }
     .funnel { grid-template-columns: repeat(3, 1fr); }
+    /* six counters across is unusable on a phone - go two up */
+    .livegrid { grid-template-columns: repeat(2, 1fr); }
+    .lstat:nth-child(2n) { border-right: 0; }
+    .lstat:not(:nth-child(-n+2)) { border-top: 1px solid var(--rule); }
+    /* thumb-sized steppers */
+    .step { width: 34px; height: 34px; font-size: 17px; }
+    .lstat .l-row input { width: 54px; }
+    /* the source captions are nowrap and were pushing the page sideways */
+    .sechead { flex-wrap: wrap; }
+    .sechead .src { margin-left: 0; flex: 1 1 100%; white-space: normal; }
   }
 </style>
 
@@ -740,29 +798,48 @@
       <h2>Devastating brain injury (DBI) monitoring &mdash; ER &amp; ICU</h2>
       <span class="src">detection pool above referral &middot; criteria pending OTSU sign-off</span>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width:13%">Case ID / HRN</th>
-          <th style="width:10%">Unit</th>
-          <th class="num" style="width:6%">GCS</th>
-          <th class="num" style="width:9%">Identified</th>
-          <th style="width:9%">Referred</th>
-          <th class="num" style="width:9%">Ref. time</th>
-          <th class="num" style="width:6%">Lag</th>
-          <th style="width:19%">Reason not referred</th>
-          <th>Outcome</th>
-        </tr>
-      </thead>
-      <tbody id="dbi-body"></tbody>
-    </table>
-    <p class="funnote dbistat">
-      <strong id="dbi-found">0</strong> identified &middot;
-      <strong id="dbi-referred">0</strong> referred &middot;
-      referral rate <strong id="dbi-rate">&mdash;</strong> &middot;
-      lag <strong id="dbi-lag">&mdash;</strong>.
-      Lag runs from identification to referral received and has no published target.
-      DBI criteria and reason codes need OTSU sign-off.
+    <div class="livegrid">
+      <div class="lstat">
+        <span class="l-lbl">Identified &mdash; ER</span>
+        <div class="l-row">
+          <button type="button" class="step no-print" data-step="dbi-er:-1" aria-label="ER identified, subtract one">&minus;</button>
+          <input type="number" min="0" step="1" id="dbi-er" placeholder="0">
+          <button type="button" class="step no-print" data-step="dbi-er:1" aria-label="ER identified, add one">+</button>
+        </div>
+      </div>
+      <div class="lstat">
+        <span class="l-lbl">Identified &mdash; ICU</span>
+        <div class="l-row">
+          <button type="button" class="step no-print" data-step="dbi-icu:-1" aria-label="ICU identified, subtract one">&minus;</button>
+          <input type="number" min="0" step="1" id="dbi-icu" placeholder="0">
+          <button type="button" class="step no-print" data-step="dbi-icu:1" aria-label="ICU identified, add one">+</button>
+        </div>
+      </div>
+      <div class="lstat auto">
+        <span class="l-lbl">Total identified</span>
+        <div class="l-val" id="dbi-found">0</div>
+      </div>
+      <div class="lstat" id="lstat-ref">
+        <span class="l-lbl">Referred to SHARE</span>
+        <div class="l-row">
+          <button type="button" class="step no-print" data-step="dbi-referred:-1" aria-label="Referred, subtract one">&minus;</button>
+          <input type="number" min="0" step="1" id="dbi-referred" placeholder="0">
+          <button type="button" class="step no-print" data-step="dbi-referred:1" aria-label="Referred, add one">+</button>
+        </div>
+      </div>
+      <div class="lstat auto">
+        <span class="l-lbl">Not referred</span>
+        <div class="l-val" id="dbi-notref">0</div>
+      </div>
+      <div class="lstat auto">
+        <span class="l-lbl">Referral rate</span>
+        <div class="l-val" id="dbi-rate">&mdash;</div>
+      </div>
+    </div>
+    <p class="funnote">
+      Tally as cases are found: the totals, the not-referred count and the referral rate update as you go.
+      Referral rate separates a detection problem from a conversation problem.
+      DBI criteria need OTSU sign-off &mdash; GCS&nbsp;&lt;&nbsp;7 is the sourced referral trigger, not a DBI definition.
     </p>
   </section>
 
@@ -1145,18 +1222,10 @@
                 "July", "August", "September", "October", "November", "December"];
 
   /* ---------- DBI: the detection pool above referral ----------
-     Criteria and the reason-not-referred codes are a first draft and need OTSU
-     sign-off. GCS < 7 is the sourced *referral* trigger (DCODC), not the DBI
-     definition - nothing in the corpus defines DBI, so no threshold is coded here. */
-  var DBI_ROWS = 3;
-
-  var DBI_UNITS = ["", "ER", "ICU", "CIU", "Medward", "Surgery", "Other"];
-  var DBI_REFERRED = ["", "Yes", "No", "Pending"];
-  var DBI_NOREF = ["", "Recovered / improved", "Family already DNR", "Medical contraindication",
-                   "Age or clinical exclusion", "Cardiac arrest before referral",
-                   "Transferred out", "Not identified in time", "Other"];
-  var DBI_OUTCOME = ["", "Under monitoring", "Recovered", "Expired",
-                     "Progressed to brain death"];
+     Tallied live rather than logged per case, so no patient-level detail is held.
+     Criteria need OTSU sign-off. GCS < 7 is the sourced *referral* trigger (DCODC),
+     not the DBI definition - nothing in the corpus defines DBI, so none is coded. */
+  var DBI_COUNTERS = ["dbi-er", "dbi-icu", "dbi-referred"];
 
   /* ---------- helpers ---------- */
 
@@ -1281,24 +1350,16 @@
     el("wm-th-month").textContent = MONTHS[+p[1] - 1].slice(0, 3) + " " + p[0];
   }
 
-  function buildDbi(rows) {
-    var total = Math.max(DBI_ROWS, rows || 0);
-    var html = "";
-    for (var i = 0; i < total; i++) {
-      html +=
-        "<tr data-dbi='" + i + "'>" +
-          "<td><input type='text' data-d='id' placeholder='HRN'></td>" +
-          "<td><select data-d='unit'>" + options(DBI_UNITS) + "</select></td>" +
-          "<td class='num'><input type='number' data-d='gcs' min='3' max='15' placeholder='&ndash;'></td>" +
-          "<td class='num'><input type='time' data-d='found'></td>" +
-          "<td><select data-d='ref'>" + options(DBI_REFERRED) + "</select></td>" +
-          "<td class='num'><input type='time' data-d='reftime'></td>" +
-          "<td class='num'><span class='flag idle' data-d='lagflag'>&mdash;</span></td>" +
-          "<td><select data-d='noref'>" + options(DBI_NOREF) + "</select></td>" +
-          "<td><select data-d='outcome'>" + options(DBI_OUTCOME) + "</select></td>" +
-        "</tr>";
-    }
-    el("dbi-body").innerHTML = html;
+  /* the +/- buttons beside each counter */
+  function stepCounter(spec) {
+    var parts = spec.split(":");
+    var box = el(parts[0]);
+    if (!box) { return; }
+    var v = parseFloat(box.value);
+    if (isNaN(v)) { v = 0; }
+    v += parseFloat(parts[1]);
+    box.value = Math.max(0, v);
+    compute();
   }
 
   function buildCharter() {
@@ -1466,43 +1527,21 @@
     return { done: done, applicable: applicable, total: sels.length };
   }
 
-  /* DBI monitoring - the detection pool. Referral lag has no published target,
-     so the lag cell reports the interval without passing or failing it. */
+  /* DBI monitoring - the detection pool, tallied live from three counters */
   function computeDbi() {
-    var found = 0, referred = 0, notReferred = 0, lags = [];
-
-    Array.prototype.forEach.call(document.querySelectorAll("[data-dbi]"), function (row) {
-      var g = function (f) { return row.querySelector("[data-d=" + f + "]"); };
-      var identified = g("id").value.trim() || g("found").value;
-      if (identified) { found++; }
-
-      var state = g("ref").value;
-      if (state === "Yes") { referred++; }
-      if (state === "No") { notReferred++; }
-
-      var lag = delta(g("found").value, g("reftime").value);
-      var flag = g("lagflag");
-      if (lag === null) {
-        flag.className = "flag idle";
-        flag.innerHTML = "&mdash;";
-      } else {
-        lags.push(lag);
-        flag.className = "flag idle";
-        flag.textContent = lag + "m";
-      }
-    });
-
+    var er = num("dbi-er"), icu = num("dbi-icu"), referred = num("dbi-referred");
+    var found = er + icu;
+    var notReferred = Math.max(0, found - referred);
     var rate = pct(referred, found);
-    el("dbi-found").textContent = found;
-    el("dbi-referred").textContent = referred;
-    el("dbi-rate").innerHTML = (rate === null) ? "&mdash;" : rate + "%";
-    el("dbi-lag").innerHTML = lags.length
-      ? (Math.min.apply(null, lags) === Math.max.apply(null, lags)
-          ? Math.min.apply(null, lags) + " min"
-          : Math.min.apply(null, lags) + "&ndash;" + Math.max.apply(null, lags) + " min")
-      : "&mdash;";
 
-    return { found: found, referred: referred, notReferred: notReferred, lags: lags };
+    el("dbi-found").textContent = found;
+    el("dbi-notref").textContent = notReferred;
+    el("dbi-rate").innerHTML = (rate === null) ? "&mdash;" : rate + "%";
+
+    /* more referred than identified is a counting error, not a 100%+ rate */
+    el("lstat-ref").setAttribute("data-state", referred > found ? "crit" : "");
+
+    return { er: er, icu: icu, found: found, referred: referred, notReferred: notReferred };
   }
 
   function computeFunnel(dbi) {
@@ -1697,78 +1736,27 @@
 
   /* ---------- narrative ---------- */
 
-  function narrateDbi() {
-    var rows = [], units = {}, found = 0, referred = 0, notRef = 0, lags = [];
+  function narrateDbi(dbi) {
+    if (!dbi.found && !dbi.referred) { return ""; }
 
-    Array.prototype.forEach.call(document.querySelectorAll("[data-dbi]"), function (row) {
-      var g = function (f) { return row.querySelector("[data-d=" + f + "]"); };
-      var id = g("id").value.trim();
-      var foundAt = g("found").value;
-      if (!id && !foundAt) { return; }
+    var s = dbi.found + " patient" + (dbi.found === 1 ? "" : "s") + " meeting DBI criteria " +
+            (dbi.found === 1 ? "was" : "were") + " identified under ER and ICU monitoring";
+    var unitBits = [];
+    if (dbi.icu) { unitBits.push(dbi.icu + " in ICU"); }
+    if (dbi.er)  { unitBits.push(dbi.er + " in ER"); }
+    if (unitBits.length) { s += " &mdash; " + listPhrase(unitBits); }
+    s += ".";
 
-      found++;
-      var unit = g("unit").value;
-      if (unit) { units[unit] = (units[unit] || 0) + 1; }
+    s += " " + dbi.referred + " referred to SHARE";
+    var rate = pct(dbi.referred, dbi.found);
+    if (rate !== null) { s += ", a referral rate of " + rate + "%"; }
+    s += ".";
 
-      var state = g("ref").value;
-      if (state === "Yes") { referred++; }
-      if (state === "No")  { notRef++; }
-
-      var lag = delta(foundAt, g("reftime").value);
-      if (lag !== null) { lags.push(lag); }
-
-      var s = "DBI case " + (id || "unidentified");
-      var bits = [];
-      if (unit) { bits.push(unit); }
-      if (g("gcs").value.trim()) { bits.push("GCS " + g("gcs").value.trim()); }
-      if (bits.length) { s += " (" + bits.join(", ") + ")"; }
-      if (foundAt) { s += " identified at " + foundAt; }
-
-      if (state === "Yes") {
-        s += g("reftime").value
-          ? " and referred to SHARE at " + g("reftime").value
-          : " and referred to SHARE";
-        if (lag !== null) {
-          s += ", a referral lag of " + lag + " minute" + (lag === 1 ? "" : "s");
-        }
-      } else if (state === "No") {
-        s += " was not referred";
-        if (g("noref").value) {
-          s += "; reason recorded as " + softLower(g("noref").value);
-        }
-      } else if (state === "Pending") {
-        s += ", referral still pending";
-      }
-      s += ".";
-
-      if (g("outcome").value) {
-        s += " Outcome recorded as " + softLower(g("outcome").value) + ".";
-      }
-      rows.push(s);
-    });
-
-    if (!found) { return ""; }
-
-    var lead = found + " patient" + (found === 1 ? "" : "s") + " meeting DBI criteria " +
-               (found === 1 ? "was" : "were") + " identified under ER and ICU monitoring";
-    var unitBits = Object.keys(units).map(function (u) { return units[u] + " in " + u; });
-    if (unitBits.length) { lead += " &mdash; " + listPhrase(unitBits); }
-    lead += ".";
-
-    lead += " " + referred + " referred to SHARE, a referral rate of " +
-            pct(referred, found) + "%";
-    if (lags.length) {
-      var lo = Math.min.apply(null, lags), hi = Math.max.apply(null, lags);
-      lead += ", with referral lag " + (lo === hi
-        ? "of " + lo + " minute" + (lo === 1 ? "" : "s")
-        : "ranging from " + lo + " to " + hi + " minutes");
+    if (dbi.notReferred) {
+      s += " " + dbi.notReferred + " case" + (dbi.notReferred === 1 ? " was" : "s were") +
+           " not referred.";
     }
-    lead += ".";
-    if (notRef) {
-      lead += " " + notRef + " case" + (notRef === 1 ? " was" : "s were") + " not referred.";
-    }
-
-    return sentences([lead].concat(rows));
+    return s;
   }
 
   function narrateWm(wm) {
@@ -1948,7 +1936,7 @@
     }
 
     /* --- DBI detection pool, above referral --- */
-    var dbiText = narrateDbi();
+    var dbiText = narrateDbi(computeDbi());
     html += para("Devastating brain injury monitoring", dbiText);
 
     /* --- weekly and monthly position from the Master --- */
@@ -2044,12 +2032,13 @@
   }
 
   function collect() {
-    var data = { fields: {}, wm: {}, dbi: [], acts: [], routine: [], admin: [], charter: [] };
+    var data = { fields: {}, wm: {}, acts: [], routine: [], admin: [], charter: [] };
 
     ["f-date", "f-name", "f-others", "fn-referrals", "fn-eligible", "fn-bd",
-     "fn-approached", "fn-consented", "fn-donors"].forEach(function (id) {
-      data.fields[id] = el(id).value;
-    });
+     "fn-approached", "fn-consented", "fn-donors"]
+      .concat(DBI_COUNTERS).forEach(function (id) {
+        data.fields[id] = el(id).value;
+      });
     data.fields.role = document.querySelector("input[name=role]:checked").value;
 
     Array.prototype.forEach.call(document.querySelectorAll("[data-wm] input"), function (c) {
@@ -2057,13 +2046,6 @@
       data.wm[key + ":" + c.getAttribute("data-p")] = c.value;
     });
 
-    Array.prototype.forEach.call(document.querySelectorAll("[data-dbi]"), function (row) {
-      var o = {};
-      Array.prototype.forEach.call(row.querySelectorAll("input,select"), function (c) {
-        o[c.getAttribute("data-d")] = c.value;
-      });
-      data.dbi.push(o);
-    });
 
     Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (row) {
       data.acts.push({
@@ -2106,18 +2088,6 @@
       if (!row) { return; }
       var c = row.querySelector("[data-p=" + parts[1] + "]");
       if (c) { c.value = data.wm[k]; }
-    });
-
-    if ((data.dbi || []).length > document.querySelectorAll("[data-dbi]").length) {
-      buildDbi(data.dbi.length);
-    }
-    (data.dbi || []).forEach(function (o, i) {
-      var row = document.querySelector("[data-dbi='" + i + "']");
-      if (!row) { return; }
-      Object.keys(o).forEach(function (f) {
-        var c = row.querySelector("[data-d=" + f + "]");
-        if (c && c.tagName !== "SPAN") { c.value = o[f]; }
-      });
     });
 
     var actRows = document.querySelectorAll("[data-act]");
@@ -2174,7 +2144,6 @@
   /* ---------- wire up ---------- */
 
   buildWm();
-  buildDbi();
   buildCharter();
   buildRoutine();
   buildAdmin();
@@ -2198,6 +2167,11 @@
   document.addEventListener("change", function (e) {
     if (e.target.name === "role") { buildActivities(); }
     compute();
+  });
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest("[data-step]") : null;
+    if (btn) { stepCounter(btn.getAttribute("data-step")); }
   });
 
   el("btn-import").addEventListener("click", runImport);
