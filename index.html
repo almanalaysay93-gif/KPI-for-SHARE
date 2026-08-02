@@ -984,10 +984,26 @@
     return hit || null;
   }
 
-  /* while Ongoing, all four are in the same real phase - state it once rather
-     than the generic "is ongoing and carries over to the next day" line */
+  /* while Ongoing, all four are in the same real phase - document/requirement
+     compliance, planning and coordination, and tool development - but each
+     gets its own wording rather than one template repeated four times */
+  var RESEARCH_PREP = {
+    "Opt-IN": "The Opt-IN research project is in the preparation phase &mdash; completing " +
+              "document and requirement compliance, coordinating extensively with stakeholders, " +
+              "and building the tools the study will use.",
+    "Neuro ABC": "Preparation continues for the Neuro ABC research project: requirement and " +
+                 "document compliance, close planning and coordination, and development of the " +
+                 "tools the study needs.",
+    "Crit Care": "The Crit Care research project remains in preparation, with document " +
+                 "compliance, extensive coordination, and the study&#39;s tools all still being " +
+                 "put in place.",
+    "EMR-DAS": "The EMR-DAS research project is still being readied &mdash; compliance " +
+               "paperwork, planning and coordination, and the tools it will run on are all in " +
+               "progress."
+  };
+
   function researchPrepSentence(name) {
-    return name + " is still being prepared: papers, planning, and the tools the study will use.";
+    return RESEARCH_PREP[name] || (name + " research project remains in the preparation phase.");
   }
 
   var CHARTER = [
@@ -1593,7 +1609,7 @@
       var isPrep = research && sel.value === "Ongoing";
 
       var statusSentence = isPrep
-        ? researchPrepSentence(research + " research project")
+        ? researchPrepSentence(research)
         : routineSentence(ROUTINE_PHRASE[i], sel.value);
 
       var row = sel.closest("tr");
