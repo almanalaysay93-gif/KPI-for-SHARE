@@ -998,7 +998,7 @@
      compliance, planning and coordination, and tool development - but each
      gets its own wording rather than one template repeated four times */
   var RESEARCH_PREP = {
-    "Opt-IN": "The Opt-IN research project is in the preparation phase &mdash; completing " +
+    "Opt-IN": "The Opt-IN research project is in the preparation phase, completing " +
               "document and requirement compliance, coordinating extensively with stakeholders, " +
               "and building the tools the study will use.",
     "Neuro ABC": "Preparation continues for the Neuro ABC research project: requirement and " +
@@ -1007,8 +1007,8 @@
     "Crit Care": "The Crit Care research project remains in preparation, with document " +
                  "compliance, extensive coordination, and the study&#39;s tools all still being " +
                  "put in place.",
-    "EMR-DAS": "The EMR-DAS research project is still being readied &mdash; compliance " +
-               "paperwork, planning and coordination, and the tools it will run on are all in " +
+    "EMR-DAS": "The EMR-DAS research project is still being readied, with compliance " +
+               "paperwork, planning and coordination, and the tools it will run on all in " +
                "progress."
   };
 
@@ -1548,7 +1548,7 @@
     var unitBits = [];
     if (dbi.icu) { unitBits.push(dbi.icu + " in ICU"); }
     if (dbi.er)  { unitBits.push(dbi.er + " in ER"); }
-    if (unitBits.length) { s += " &mdash; " + listPhrase(unitBits); }
+    if (unitBits.length) { s += ", " + listPhrase(unitBits); }
     s += ".";
 
     s += " " + dbi.referred + " referred to SHARE";
@@ -1776,8 +1776,7 @@
       var shiftHours = SHIFT_MIN / 60;
       var shiftAdj = (shiftHours % 1 === 0) ? shiftHours + "-hour" : formatDuration(SHIFT_MIN);
       routineText = sentences([routineText].concat(minBits));
-      routineText += " In total, " + formatDuration(grandTotal) + " of the " + shiftAdj +
-                     " shift &mdash; a workload index of " + (grandTotal / SHIFT_MIN).toFixed(2) + ".";
+      routineText += " In total, " + formatDuration(grandTotal) + " of the " + shiftAdj + " shift.";
     }
     html += para("Daily routine", routineText);
     html += para("Administration, coordination &amp; outreach", sentences(lists.admin));
