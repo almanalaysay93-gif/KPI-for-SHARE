@@ -582,6 +582,11 @@
     select { -webkit-appearance: none; appearance: none; }
     .sec, .funnel, tr { page-break-inside: avoid; }
     .fstage[data-state="crit"] { box-shadow: none; border-left: 3px solid var(--crit); }
+
+    /* print only what was actually checked or filled in */
+    .chkwrap:not(:has(input:checked)) { display: none; }
+    tr[data-empty="1"] { display: none; }
+    #sec-others[data-empty="1"] { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -841,7 +846,7 @@
   </section>
 
   <!-- OTHERS -->
-  <section class="sec">
+  <section class="sec" id="sec-others">
     <div class="sechead">
       <h2>Others &mdash; activities not listed above</h2>
       <span class="src">free text</span>
@@ -1746,12 +1751,41 @@
     el("narrative-out").innerHTML = html;
   }
 
+  /* flags rows/sections with nothing entered, so print can hide them -
+     checkboxes are handled in CSS directly via :has(input:checked) */
+  function markPrintVisibility() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-routine]"), function (sel) {
+      var row = sel.closest("tr");
+      var std = row.querySelector("[data-r=std]").value.trim();
+      var count = row.querySelector("[data-r=count]").value.trim();
+      var empty = !sel.value && !std && !count;
+      row.setAttribute("data-empty", empty ? "1" : "");
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("#charter-body tr"), function (row) {
+      var any = Array.prototype.some.call(row.querySelectorAll("input"), function (inp) {
+        return inp.value.trim() !== "";
+      });
+      row.setAttribute("data-empty", any ? "" : "1");
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-wm]"), function (row) {
+      var inputs = row.querySelectorAll("input");
+      if (!inputs.length) { return; }
+      var any = Array.prototype.some.call(inputs, function (inp) { return inp.value.trim() !== ""; });
+      row.setAttribute("data-empty", any ? "" : "1");
+    });
+
+    el("sec-others").setAttribute("data-empty", el("f-others").value.trim() ? "" : "1");
+  }
+
   function compute() {
     var routine = computeRoutine();
     var mins = routine.minutes + charterMinutes();
     computeFunnel(computeDbi());
     computeWm();
     renderPeriod();
+    markPrintVisibility();
 
     /* the daily routine table's own running total, at its foot */
     el("act-total").textContent = mins;
