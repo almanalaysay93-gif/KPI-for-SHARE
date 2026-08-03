@@ -1672,7 +1672,16 @@
         durationSentence = "Took " + formatDuration(std) + ".";
       }
 
-      var combined = sentences([statusSentence, countSentence, durationSentence]);
+      var timeSentence = "";
+      var startMin = clockToMinutes(row.querySelector("[data-r=start]").value);
+      if (startMin !== null) {
+        var endText = row.querySelector("[data-r=end]").textContent;
+        timeSentence = (endText && endText !== "—")
+          ? "Started at " + minutesToClock12(startMin) + ", ended at " + endText + "."
+          : "Started at " + minutesToClock12(startMin) + ".";
+      }
+
+      var combined = sentences([statusSentence, countSentence, durationSentence, timeSentence]);
 
       if (holder) {
         holder.hidden = !combined;
