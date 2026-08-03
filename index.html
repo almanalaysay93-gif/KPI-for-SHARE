@@ -818,7 +818,7 @@
       <h2>Daily routine &mdash; OTSU standing tasks</h2>
       <span class="src">OTSU Calendar of Activities, &ldquo;Daily Routine&rdquo; &middot; std min entered by coordinator, not a published schedule</span>
     </div>
-    <p class="legend no-print"><strong>How to fill up:</strong> for each task worked today, enter standard minutes and a count, and the time started. Subtotal and Ended calculate automatically. Pick a status &mdash; Completed, Ongoing, Pending, Deferred or Cancelled &mdash; last, since Ended stays blank while Status is Ongoing.</p>
+    <p class="legend no-print"><strong>How to fill up:</strong> for each task worked today, enter standard minutes and a count, and the time started. Subtotal and Ended calculate automatically once both are entered, whatever the status.</p>
     <table>
       <thead>
         <tr>
@@ -841,7 +841,7 @@
       </tfoot>
     </table>
     <p class="funnote">
-      Ended is calculated from Started plus Std min, and is left blank while Status is Ongoing.
+      Ended is calculated from Started plus Std min, and is left blank until both are entered.
     </p>
   </section>
 
@@ -1340,10 +1340,13 @@
         cell.textContent = sub;
       }
 
-      /* Ended = Started + Std min, left blank while Ongoing or if either input is missing */
+      /* Ended = Started + Std min, left blank only if either input is missing.
+         Not gated on status: research rows stay "Ongoing" for the life of the
+         project even after a day's session is done, so gating on status hid
+         Ended for exactly the rows most likely to have one. */
       var endCell = row.querySelector("[data-r=end]");
       var startMin = clockToMinutes(row.querySelector("[data-r=start]").value);
-      if (s.value === "Ongoing" || startMin === null || isNaN(std)) {
+      if (startMin === null || isNaN(std)) {
         endCell.innerHTML = "&mdash;";
       } else {
         endCell.textContent = minutesToClock12(startMin + std);
