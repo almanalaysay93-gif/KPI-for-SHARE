@@ -333,6 +333,17 @@
     white-space: nowrap;
   }
 
+  .legend {
+    font-size: 10px;
+    line-height: 1.4;
+    color: var(--ink-2);
+    background: var(--band);
+    border-left: 2px solid var(--rule-strong);
+    padding: 3px 7px;
+    margin: 0 0 7px;
+  }
+  .legend strong { color: var(--ink); }
+
   /* ---------- tables ---------- */
   table { width: 100%; border-collapse: collapse; }
   th {
@@ -683,6 +694,7 @@
       <div class="daycontext" id="daycontext"><span class="tag none">Enter a date</span></div>
     </div>
   </div>
+  <p class="legend no-print"><strong>How to fill up:</strong> enter today&#39;s date, your name, and pick your role (CTC or PTC). The scheduled context box fills itself in from the date &mdash; nothing to type there.</p>
 
   <!-- WEEKLY / MONTHLY UPDATE -->
   <section class="sec">
@@ -690,6 +702,7 @@
       <h2>Weekly &amp; monthly update &mdash; POMD Referral Master</h2>
       <span class="src" id="wm-period">mirrors the Weekly Update and Monthly Update tabs</span>
     </div>
+    <p class="legend no-print"><strong>How to fill up:</strong> open the POMD Referral Master&#39;s own Weekly Update and Monthly Update tabs and copy each total into the matching row here. Consent rate calculates itself.</p>
     <table>
       <thead>
         <tr>
@@ -714,6 +727,7 @@
       <h2>Potential donor funnel &mdash; daily counts</h2>
       <span class="src">stages and vocabulary mirror the POMD Referral Master 2026 dashboard</span>
     </div>
+    <p class="legend no-print"><strong>How to fill up:</strong> enter DBI identified split by ER and ICU; the box below it and every rate down the funnel calculate automatically. Enter the remaining stage counts as they happen through the day &mdash; referred to SHARE, potential donors, and on down.</p>
     <div class="funnel">
       <div class="fstage">
         <span class="f-lbl">DBI identified</span>
@@ -774,6 +788,7 @@
       <h2>Citizen&#39;s Charter services delivered</h2>
       <span class="src">OTSU Citizens Charter 2026 &middot; office hours 7:00 AM&ndash;3:00 PM, Mon&ndash;Fri</span>
     </div>
+    <p class="legend no-print"><strong>How to fill up:</strong> for each service delivered today, enter clients served, how many of those were served within the charter time, and how many HCES survey forms were issued.</p>
     <table>
       <thead>
         <tr>
@@ -805,6 +820,7 @@
       <h2>Daily routine &mdash; OTSU standing tasks</h2>
       <span class="src">OTSU Calendar of Activities, &ldquo;Daily Routine&rdquo; &middot; std min entered by coordinator, not a published schedule</span>
     </div>
+    <p class="legend no-print"><strong>How to fill up:</strong> for each task worked today, enter standard minutes and a count, and the time started. Subtotal and Ended calculate automatically. Pick a status &mdash; Completed, Ongoing, Pending, Deferred or Cancelled &mdash; last, since Ended stays blank while Status is Ongoing.</p>
     <table>
       <thead>
         <tr>
@@ -837,6 +853,7 @@
       <h2>Routine administration, coordination &amp; internal outreach</h2>
       <span class="src">carried from SPMC SHARE TC Daily Activity Report</span>
     </div>
+    <p class="legend no-print"><strong>How to fill up:</strong> tick every activity done today. Each tick writes its own sentence into the narrative report below &mdash; nothing else to type.</p>
     <div class="checks" id="admin-checks"></div>
   </section>
 
@@ -846,6 +863,7 @@
       <h2>Narrative accomplishment report</h2>
       <span class="src">auto-generated from every entry on both sheets</span>
     </div>
+    <p class="legend no-print"><strong>How to fill up:</strong> nothing &mdash; this writes itself from every entry above as you make it. Copy it once the sheet is complete.</p>
     <div class="narrative" id="narrative-out"></div>
     <button class="btn no-print" id="btn-copy">Copy narrative</button>
   </section>
@@ -856,6 +874,7 @@
       <h2>Others &mdash; activities not listed above</h2>
       <span class="src">free text</span>
     </div>
+    <p class="legend no-print"><strong>How to fill up:</strong> only if something happened today that isn&#39;t covered by any row above &mdash; an incident, a near-miss, an escalation. Leave blank otherwise.</p>
     <textarea id="f-others" placeholder="Specify any activity, incident, near-miss, or escalation not covered by the rows above."></textarea>
   </section>
 
