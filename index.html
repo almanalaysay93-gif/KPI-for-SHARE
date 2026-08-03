@@ -1567,10 +1567,7 @@
     if (unitBits.length) { s += ", " + listPhrase(unitBits); }
     s += ".";
 
-    s += " " + dbi.referred + " referred to SHARE";
-    var rate = pct(dbi.referred, dbi.found);
-    if (rate !== null) { s += ", a referral rate of " + rate + "%"; }
-    s += ".";
+    s += " " + dbi.referred + " referred to SHARE.";
 
     if (dbi.notReferred) {
       s += " " + dbi.notReferred + " case" + (dbi.notReferred === 1 ? " was" : "s were") +
@@ -1597,7 +1594,6 @@
       if (v.donors) { bits.push(v.donors + " actual donor" + (v.donors === 1 ? "" : "s")); }
       if (bits.length) { s += ", of which " + listPhrase(bits); }
       s += ".";
-      if (v.rate !== null) { s += " Consent rate " + v.rate + "%."; }
       out.push(s);
     });
 
