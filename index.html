@@ -1615,11 +1615,6 @@
             a + " famil" + (a === 1 ? "y" : "ies") + " approached, " +
             c + " consent" + (c === 1 ? "" : "s") + " obtained, " +
             d + " actual donor" + (d === 1 ? "" : "s") + ".";
-    var rates = [];
-    if (a && pct(c, a) !== null) { rates.push("consent rate " + pct(c, a) + "%"); }
-    if (b && pct(a, b) !== null) { rates.push("approach rate " + pct(a, b) + "%"); }
-    if (r && pct(e, r) !== null) { rates.push("escalation rate " + pct(e, r) + "%"); }
-    if (rates.length) { s += " " + rates.join(", ").replace(/^./, function (m) { return m.toUpperCase(); }) + "."; }
     return s;
   }
 
@@ -1672,16 +1667,12 @@
           : "Logged " + c + " times, " + formatDuration(std) + " each, " + formatDuration(sub) + " total.";
       }
 
-      var timeSentence = "";
-      var startMin = clockToMinutes(row.querySelector("[data-r=start]").value);
-      if (startMin !== null) {
-        var endText = row.querySelector("[data-r=end]").textContent;
-        timeSentence = (endText && endText !== "—")
-          ? "Started at " + minutesToClock12(startMin) + ", ended at " + endText + "."
-          : "Started at " + minutesToClock12(startMin) + ".";
+      var durationSentence = "";
+      if (!countSentence && !isNaN(std)) {
+        durationSentence = "Took " + formatDuration(std) + ".";
       }
 
-      var combined = sentences([statusSentence, countSentence, timeSentence]);
+      var combined = sentences([statusSentence, countSentence, durationSentence]);
 
       if (holder) {
         holder.hidden = !combined;
