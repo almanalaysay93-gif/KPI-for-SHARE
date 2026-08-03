@@ -1769,24 +1769,9 @@
       : "";
     html += para("Citizen&#39;s Charter services", sentences([ccLead].concat(charter)));
 
-    /* --- routine, with its own std-min/count arithmetic spelled out --- */
+    /* --- routine: per-task narration already states each task's own start
+       time and duration (see narrateChecklists) - no day-wide total here --- */
     var routineText = routineProse(lists.routine, lists.researchOngoing);
-    var rm = computeRoutine().minutes;
-    var cm = charterMinutes();
-    if (rm || cm) {
-      var minBits = [];
-      if (rm) {
-        minBits.push("Daily routine work took " + formatDuration(rm) + ".");
-      }
-      if (cm) {
-        minBits.push("Citizen&#39;s Charter services (above) added " + formatDuration(cm) + " more.");
-      }
-      var grandTotal = rm + cm;
-      var shiftHours = SHIFT_MIN / 60;
-      var shiftAdj = (shiftHours % 1 === 0) ? shiftHours + "-hour" : formatDuration(SHIFT_MIN);
-      routineText = sentences([routineText].concat(minBits));
-      routineText += " In total, " + formatDuration(grandTotal) + " of the " + shiftAdj + " shift.";
-    }
     html += para("Daily routine", routineText);
     html += para("Administration, coordination &amp; outreach", sentences(lists.admin));
 
