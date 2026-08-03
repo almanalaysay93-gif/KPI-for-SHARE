@@ -788,14 +788,13 @@
       <h2>Citizen&#39;s Charter services delivered</h2>
       <span class="src">OTSU Citizens Charter 2026 &middot; office hours 7:00 AM&ndash;3:00 PM, Mon&ndash;Fri</span>
     </div>
-    <p class="legend no-print"><strong>How to fill up:</strong> for each service delivered today, enter clients served, how many of those were served within the charter time, and how many HCES survey forms were issued.</p>
+    <p class="legend no-print"><strong>How to fill up:</strong> for each service delivered today, enter clients served and how many HCES survey forms were issued.</p>
     <table>
       <thead>
         <tr>
           <th>Service</th>
           <th class="num" style="width:13%">Charter time</th>
           <th class="num" style="width:12%">Clients served</th>
-          <th class="num" style="width:14%">Within charter</th>
           <th class="num" style="width:13%">HCES forms issued</th>
         </tr>
       </thead>
@@ -1187,7 +1186,6 @@
         "<td>" + r[0] + "</td>" +
         "<td class='num mono' style='color:var(--ink-3)'>" + r[1] + "</td>" +
         "<td class='num'><input type='number' min='0' step='1' data-cc='served' placeholder='0'></td>" +
-        "<td class='num'><input type='number' min='0' step='1' data-cc='within' placeholder='0'></td>" +
         "<td class='num'><input type='number' min='0' step='1' data-cc='hces' placeholder='0'></td>" +
       "</tr>";
     }).join("");
@@ -1631,16 +1629,10 @@
     Array.prototype.forEach.call(document.querySelectorAll("#charter-body tr"), function (row, i) {
       var served = parseFloat(row.querySelector("[data-cc=served]").value) || 0;
       if (!served) { return; }
-      var within = parseFloat(row.querySelector("[data-cc=within]").value);
       var hces = parseFloat(row.querySelector("[data-cc=hces]").value);
       var name = softLower(CHARTER[i][0]);
       var s = "Served " + served + " client" + (served === 1 ? "" : "s") + " for " + name +
               " (charter time " + CHARTER[i][1] + ")";
-      if (!isNaN(within)) {
-        s += ", " + within + " within charter time";
-        var p = pct(within, served);
-        if (p !== null) { s += " (" + p + "%)"; }
-      }
       if (!isNaN(hces) && hces) { s += "; " + hces + " HCES form" + (hces === 1 ? "" : "s") + " issued"; }
       out.push(s + ".");
     });
