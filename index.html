@@ -229,7 +229,7 @@
   /* ---------- identity strip ---------- */
   .identity {
     display: grid;
-    grid-template-columns: 1.15fr 1.5fr 1.35fr 1.5fr;
+    grid-template-columns: 1.15fr 1.5fr 1.35fr;
     gap: 0;
     border-bottom: 1px solid var(--rule);
   }
@@ -296,25 +296,6 @@
     padding: 3px 5px;
   }
   .role-add .btn { padding: 3px 9px; font-size: 10px; }
-
-  .daycontext {
-    font: 600 10px/1.35 var(--sans);
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    color: var(--accent);
-    min-height: 24px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  .daycontext .tag {
-    border: 1px solid var(--accent);
-    border-radius: 2px;
-    padding: 1px 5px;
-    background: var(--accent-soft);
-  }
-  .daycontext .none { color: var(--ink-3); border-color: var(--rule); background: transparent; }
 
   /* ---------- section headers ---------- */
   .sec { margin-top: 13px; }
@@ -740,12 +721,8 @@
         <button type="button" class="btn" id="btn-add-role">+</button>
       </div>
     </div>
-    <div class="idcell">
-      <span class="lbl">Scheduled context today</span>
-      <div class="daycontext" id="daycontext"><span class="tag none">Enter a date</span></div>
-    </div>
   </div>
-  <p class="legend no-print"><strong>How to fill up:</strong> enter today&#39;s date, your name, and pick your role (PTC&middot;RN or PTC&middot;MD). The scheduled context box fills itself in from the date &mdash; nothing to type there.</p>
+  <p class="legend no-print"><strong>How to fill up:</strong> enter today&#39;s date, your name, and pick your role (PTC&middot;RN or PTC&middot;MD).</p>
 
   <!-- WEEKLY / MONTHLY UPDATE -->
   <section class="sec">
@@ -934,7 +911,7 @@
     <div class="sigbox">
       <div class="sigline">
         <div class="role">Noted by</div>
-        <div class="hint">Supervisor&#39;s signature</div>
+        <div class="hint">Immediate Supervisor&#39;s signature</div>
       </div>
     </div>
   </div>
@@ -1491,42 +1468,7 @@
   }
 
 
-  /* ---------- day context ---------- */
-
-  function dayContext(value) {
-    if (!value) { return null; }
-    var parts = value.split("-");
-    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-    if (isNaN(d.getTime())) { return null; }
-
-    var dow = d.getDay();                       // 0 Sun .. 6 Sat
-    var dom = d.getDate();
-    var nth = Math.floor((dom - 1) / 7) + 1;    // nth occurrence of this weekday
-    var lastOfMonth = new Date(+parts[0], +parts[1], 0).getDate();
-    var isLast = dom + 7 > lastOfMonth;
-
-    var tags = [];
-    if (dow === 1 && nth === 1) { tags.push("Orientation"); }
-    if (dow === 1 && isLast)    { tags.push("OTSU meeting"); }
-    if (dow === 2)              { tags.push("Kidney transplant"); }
-    if (dow === 4)              { tags.push("KT clinic"); }
-    if (dow === 4 && nth === 3) { tags.push("Ethics"); }
-    if (dow === 4 && nth === 4) { tags.push("COTA"); }
-    if (dow === 0 || dow === 6) { tags.push("Weekend &mdash; outside charter hours"); }
-    return tags;
-  }
-
   function renderDayContext() {
-    var tags = dayContext(el("f-date").value);
-    var box = el("daycontext");
-    if (tags === null) {
-      box.innerHTML = "<span class='tag none'>Enter a date</span>";
-    } else if (!tags.length) {
-      box.innerHTML = "<span class='tag none'>No fixed activity scheduled</span>";
-    } else {
-      box.innerHTML = tags.map(function (t) { return "<span class='tag'>" + t + "</span>"; }).join("");
-    }
-
     var name = el("f-name").value.trim();
     var dv = el("f-date").value;
     el("page2-meta").innerHTML = (dv || "&mdash;") + (name ? "<br>" + name : "");
@@ -2003,17 +1945,12 @@
     var roleKey = document.querySelector("input[name=role]:checked").value;
     var role    = ROLE_LABEL[roleKey] || CUSTOM_ROLE_LABELS[roleKey] || roleKey.replace("_", "/");
 
-    /* --- opening: who, in what role, on which day, against what schedule --- */
+    /* --- opening: who, in what role, on which day --- */
     var html = "";
     if (date || name) {
-      var tags = dayContext(date);
-      var ctx = (tags && tags.length)
-        ? tags.join(", ").replace(/&mdash;/g, "-").toLowerCase()
-        : "no fixed unit activity scheduled";
       html += "<p><strong>" + esc(name || "The transplant coordinator") + "</strong>, " +
               role + ", on duty" + (date ? " on " + date : "") +
-              " for the 7:00 AM&ndash;3:00 PM charter shift (" + formatDuration(SHIFT_MIN) + "). " +
-              "Scheduled context for the day: " + ctx + ".</p>";
+              " for the 7:00 AM&ndash;3:00 PM charter shift (" + formatDuration(SHIFT_MIN) + ").</p>";
     }
 
     /* --- DBI detection pool, above referral --- */
