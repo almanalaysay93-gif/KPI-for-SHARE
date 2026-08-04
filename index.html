@@ -734,8 +734,8 @@
     </table>
     <p class="funnote">
       Counts cover all GCS categories, as the Master&#39;s own Weekly and Monthly Update tabs do.
-      YTD column is the 2026 programme position to 26 July: 104 referrals, 6 brain death declared, 6 approached, 1 consent, 1 actual donor.
-      Expired YTD is the <code>EXPIRED</code> column; the Master&#39;s <code>DNR/EXPIRY</code> column disagrees with it (33) and the conflict is unresolved.
+      YTD column auto-updates from the Master&#39;s Dashboard tab, same as Week and Month.
+      Expired YTD is the <code>EXPIRED</code> column; the Master&#39;s <code>DNR/EXPIRY</code> column has disagreed with it before, worth spot-checking if the two drift.
     </p>
   </section>
 
@@ -1154,7 +1154,7 @@
         "<td>" + r[1] + "</td>" +
         "<td class='num'><input type='number' min='0' step='1' data-p='week' placeholder='0'></td>" +
         "<td class='num'><input type='number' min='0' step='1' data-p='month' placeholder='0'></td>" +
-        "<td class='num mono' style='color:var(--ink-3)'>" + r[2] + "</td>" +
+        "<td class='num mono ytd-cell' style='color:var(--ink-3)'>" + r[2] + "</td>" +
       "</tr>";
     }).join("");
 
@@ -1163,7 +1163,7 @@
       "<td>Consent rate</td>" +
       "<td class='num mono' id='wm-rate-week'>&mdash;</td>" +
       "<td class='num mono' id='wm-rate-month'>&mdash;</td>" +
-      "<td class='num mono' style='color:var(--ink-3)'>17%</td>" +
+      "<td class='num mono ytd-cell' style='color:var(--ink-3)'>17%</td>" +
     "</tr>";
 
     el("wm-body").innerHTML = html;
@@ -1175,6 +1175,13 @@
      are ever read - the rest is discarded unparsed and never stored or rendered. */
   var WM_SHEET_ID = "1i-nelRklAwL66TeBWHvqr_eGQ7vkw3PjUxMMP1vfZn0";
   var WM_FETCH_TABS = { week: "Weekly Update", month: "Monthly Update" };
+  var WM_LABELS  = { total: "Total Patients",  expired: "Expired", bd: "Brain Death",
+                      appr: "Family Approached", cons: "Family Consent", donors: "Actual Donors" };
+  /* the Dashboard tab is pure aggregate - no patient rows at all - and phrases
+     its own header labels slightly differently, hence the separate map */
+  var YTD_LABELS = { total: "Total Referrals", expired: "Expired", bd: "Brain Death",
+                      appr: "Family Approached", cons: "Family Consent", donors: "Actual Donors",
+                      rate: "Consent Rate" };
   var WM_FETCH_INTERVAL_MS = 60 * 60 * 1000;
 
   function fetchSheetCsv(sheetName) {
@@ -1195,27 +1202,24 @@
   }
 
   /* only the header row and the one values row beneath it are read;
-     everything past line 2 (the per-patient rows) is ignored entirely */
-  function parseWmAggregate(csvText) {
+     everything past line 2 (the per-patient rows, where present) is
+     ignored entirely - never stored, logged, or rendered */
+  function parseAggregateRow(csvText, labelMap) {
     var firstTwo = csvText.split(/\r\n|\n|\r/, 2);
     if (firstTwo.length < 2) { return null; }
     var labels = splitLine(firstTwo[0], ",");
     var values = splitLine(firstTwo[1], ",");
-    var idx = {
-      total:   findLabelCol(labels, "Total Patients"),
-      expired: findLabelCol(labels, "Expired"),
-      bd:      findLabelCol(labels, "Brain Death"),
-      appr:    findLabelCol(labels, "Family Approached"),
-      cons:    findLabelCol(labels, "Family Consent"),
-      donors:  findLabelCol(labels, "Actual Donors")
-    };
     var out = {};
-    Object.keys(idx).forEach(function (key) {
-      var i = idx[key];
-      var v = (i > -1 && values[i] !== undefined) ? parseInt(values[i], 10) : NaN;
-      out[key] = isNaN(v) ? 0 : v;
+    Object.keys(labelMap).forEach(function (key) {
+      var i = findLabelCol(labels, labelMap[key]);
+      out[key] = (i > -1 && values[i] !== undefined) ? values[i].trim() : "";
     });
     return out;
+  }
+
+  function toInt(v) {
+    var n = parseInt(v, 10);
+    return isNaN(n) ? 0 : n;
   }
 
   function applyWmAggregate(period, agg) {
@@ -1224,8 +1228,23 @@
       var row = document.querySelector("[data-wm='" + key + "']");
       if (!row) { return; }
       var c = row.querySelector("[data-p='" + period + "']");
-      if (c) { c.value = agg[key]; }
+      if (c) { c.value = toInt(agg[key]); }
     });
+  }
+
+  function applyYtd(agg) {
+    if (!agg) { return; }
+    ["total", "expired", "bd", "appr", "cons", "donors"].forEach(function (key) {
+      var row = document.querySelector("[data-wm='" + key + "']");
+      if (!row) { return; }
+      var c = row.querySelector(".ytd-cell");
+      if (c) { c.textContent = toInt(agg[key]); }
+    });
+    var rateRow = document.querySelector("[data-wm='rate']");
+    if (rateRow) {
+      var rc = rateRow.querySelector(".ytd-cell");
+      if (rc && agg.rate) { rc.textContent = agg.rate; }
+    }
   }
 
   function setWmFetchStatus(msg, cls) {
@@ -1238,11 +1257,13 @@
   function autoFetchWm() {
     setWmFetchStatus("Checking Google Sheet…");
     Promise.all([
-      fetchSheetCsv(WM_FETCH_TABS.week).then(parseWmAggregate),
-      fetchSheetCsv(WM_FETCH_TABS.month).then(parseWmAggregate)
+      fetchSheetCsv(WM_FETCH_TABS.week).then(function (t) { return parseAggregateRow(t, WM_LABELS); }),
+      fetchSheetCsv(WM_FETCH_TABS.month).then(function (t) { return parseAggregateRow(t, WM_LABELS); }),
+      fetchSheetCsv("Dashboard").then(function (t) { return parseAggregateRow(t, YTD_LABELS); })
     ]).then(function (results) {
       applyWmAggregate("week", results[0]);
       applyWmAggregate("month", results[1]);
+      applyYtd(results[2]);
       compute();
       var t = new Date();
       setWmFetchStatus("Auto-updated " + String(t.getHours()).padStart(2, "0") + ":" +
