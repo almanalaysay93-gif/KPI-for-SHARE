@@ -634,6 +634,9 @@
   <button class="btn btn-primary" id="btn-print">Print sheet</button>
   <button class="btn" id="btn-save">Save day</button>
   <button class="btn" id="btn-clear">Clear day</button>
+  <button class="btn" id="btn-save-file">Save to file&hellip;</button>
+  <button class="btn" id="btn-load-file">Load from file&hellip;</button>
+  <input type="file" id="load-file-input" accept="application/json" hidden>
   <span class="spacer"></span>
   <span class="saved-note" id="saved-note">Not saved yet</span>
 </div>
@@ -889,6 +892,7 @@
     <button class="btn no-print" id="btn-copy">Copy narrative</button>
     <button class="btn no-print" id="btn-edit-narrative">Edit narrative</button>
     <button class="btn no-print" id="btn-reset-narrative" hidden>Reset to auto-generated</button>
+    <button class="btn no-print" id="btn-export-word">Export as Word</button>
   </section>
 
   <!-- OTHERS -->
@@ -2090,6 +2094,68 @@
       .catch(function () { return null; });
   }
 
+  /* ---------- local file save/load, and Word export ----------
+     Real files on disk, independent of browser storage - portable,
+     backup-able, movable between machines with no cloud involved. */
+  function downloadBlob(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function saveDayToFile() {
+    var date = el("f-date").value || "undated";
+    var blob = new Blob([JSON.stringify(collect(), null, 2)], { type: "application/json" });
+    downloadBlob(blob, "share-tc-dash-" + date + ".json");
+  }
+
+  function loadDayFromFile(file) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        apply(data);
+        renderDayContext();
+        compute();
+        el("saved-note").textContent = "Loaded from file: " + file.name;
+      } catch (err) {
+        el("saved-note").textContent = "Could not read that file - not a valid saved-day file.";
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  /* Word opens HTML given a .doc extension and this specific namespace
+     preamble - a long-standing, genuinely supported Word behavior, not a
+     hack. Produces a real file Word/LibreOffice/Google Docs (via import)
+     all open correctly, with no library, build step, or network needed. */
+  function exportNarrativeAsWord() {
+    var date = el("f-date").value || "undated";
+    var name = el("f-name").value.trim();
+    var content = el("narrative-out").innerHTML;
+    var html = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+      "xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
+      "<head><meta charset='utf-8'><title>Narrative Accomplishment Report</title>" +
+      "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]-->" +
+      "<style>" +
+      "body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#14181c;}" +
+      "h2{font-size:14pt;margin:0 0 12pt;}" +
+      "h3{font-size:10.5pt;text-transform:uppercase;letter-spacing:1px;color:#0f6b5c;margin:14pt 0 4pt;}" +
+      "p{margin:0 0 10pt;line-height:1.4;}" +
+      "</style></head><body>" +
+      "<h2>Narrative Accomplishment Report &mdash; SHARE TC Daily KPI</h2>" +
+      "<p><strong>" + esc(date) + (name ? " &middot; " + esc(name) : "") + "</strong></p>" +
+      content +
+      "</body></html>";
+    var blob = new Blob(["﻿", html], { type: "application/msword" });
+    downloadBlob(blob, "SHARE-TC-Narrative-" + date + ".doc");
+  }
+
   function collect() {
     var data = { fields: {}, wm: {}, routine: [], admin: [], charter: [] };
 
@@ -2403,6 +2469,13 @@
 
   el("btn-print").addEventListener("click", function () { save(true); window.print(); });
   el("btn-save").addEventListener("click", function () { save(false); });
+  el("btn-save-file").addEventListener("click", saveDayToFile);
+  el("btn-load-file").addEventListener("click", function () { el("load-file-input").click(); });
+  el("load-file-input").addEventListener("change", function (e) {
+    if (e.target.files && e.target.files[0]) { loadDayFromFile(e.target.files[0]); }
+    e.target.value = "";
+  });
+  el("btn-export-word").addEventListener("click", exportNarrativeAsWord);
   el("btn-clear").addEventListener("click", function () {
     if (!window.confirm("Clear every entry on this sheet for " + (el("f-date").value || "this date") + "?")) { return; }
     try { localStorage.removeItem(storageKey()); } catch (e) {}
