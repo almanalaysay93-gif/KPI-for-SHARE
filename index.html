@@ -718,7 +718,9 @@
       <h2>Weekly &amp; monthly update &mdash; POMD Referral Master</h2>
       <span class="src" id="wm-period">mirrors the Weekly Update and Monthly Update tabs</span>
     </div>
-    <p class="legend no-print"><strong>How to fill up:</strong> open the POMD Referral Master&#39;s own Weekly Update and Monthly Update tabs and copy each total into the matching row here. Consent rate calculates itself.</p>
+    <p class="legend no-print"><strong>How to fill up:</strong> nothing, usually &mdash; this refreshes itself hourly from the Sheet&#39;s Weekly Update and Monthly Update tabs. Type over a number by hand if you need to correct it before the next refresh.</p>
+    <p class="imp-status no-print" id="wm-fetch-status">Not yet checked.</p>
+    <button class="btn no-print" id="btn-wm-refresh" style="margin:0 0 8px">Refresh now</button>
     <table>
       <thead>
         <tr>
@@ -1165,6 +1167,90 @@
     "</tr>";
 
     el("wm-body").innerHTML = html;
+  }
+
+  /* ---------- live auto-fetch, Weekly Update / Monthly Update tabs only ----------
+     Deliberately never touches the Master tab. Both tabs export their per-patient
+     rows below the aggregate header, so only the first two lines of the response
+     are ever read - the rest is discarded unparsed and never stored or rendered. */
+  var WM_SHEET_ID = "1i-nelRklAwL66TeBWHvqr_eGQ7vkw3PjUxMMP1vfZn0";
+  var WM_FETCH_TABS = { week: "Weekly Update", month: "Monthly Update" };
+  var WM_FETCH_INTERVAL_MS = 60 * 60 * 1000;
+
+  function fetchSheetCsv(sheetName) {
+    var url = "https://docs.google.com/spreadsheets/d/" + WM_SHEET_ID +
+      "/gviz/tq?tqx=out:csv&sheet=" + encodeURIComponent(sheetName);
+    return fetch(url).then(function (r) {
+      if (!r.ok) { throw new Error("HTTP " + r.status); }
+      return r.text();
+    });
+  }
+
+  function findLabelCol(row, label) {
+    var w = label.toUpperCase();
+    for (var i = 0; i < row.length; i++) {
+      if (row[i].toUpperCase().indexOf(w) > -1) { return i; }
+    }
+    return -1;
+  }
+
+  /* only the header row and the one values row beneath it are read;
+     everything past line 2 (the per-patient rows) is ignored entirely */
+  function parseWmAggregate(csvText) {
+    var firstTwo = csvText.split(/\r\n|\n|\r/, 2);
+    if (firstTwo.length < 2) { return null; }
+    var labels = splitLine(firstTwo[0], ",");
+    var values = splitLine(firstTwo[1], ",");
+    var idx = {
+      total:   findLabelCol(labels, "Total Patients"),
+      expired: findLabelCol(labels, "Expired"),
+      bd:      findLabelCol(labels, "Brain Death"),
+      appr:    findLabelCol(labels, "Family Approached"),
+      cons:    findLabelCol(labels, "Family Consent"),
+      donors:  findLabelCol(labels, "Actual Donors")
+    };
+    var out = {};
+    Object.keys(idx).forEach(function (key) {
+      var i = idx[key];
+      var v = (i > -1 && values[i] !== undefined) ? parseInt(values[i], 10) : NaN;
+      out[key] = isNaN(v) ? 0 : v;
+    });
+    return out;
+  }
+
+  function applyWmAggregate(period, agg) {
+    if (!agg) { return; }
+    Object.keys(agg).forEach(function (key) {
+      var row = document.querySelector("[data-wm='" + key + "']");
+      if (!row) { return; }
+      var c = row.querySelector("[data-p='" + period + "']");
+      if (c) { c.value = agg[key]; }
+    });
+  }
+
+  function setWmFetchStatus(msg, cls) {
+    var box = el("wm-fetch-status");
+    if (!box) { return; }
+    box.textContent = msg;
+    box.className = "imp-status no-print" + (cls ? " " + cls : "");
+  }
+
+  function autoFetchWm() {
+    setWmFetchStatus("Checking Google Sheet…");
+    Promise.all([
+      fetchSheetCsv(WM_FETCH_TABS.week).then(parseWmAggregate),
+      fetchSheetCsv(WM_FETCH_TABS.month).then(parseWmAggregate)
+    ]).then(function (results) {
+      applyWmAggregate("week", results[0]);
+      applyWmAggregate("month", results[1]);
+      compute();
+      var t = new Date();
+      setWmFetchStatus("Auto-updated " + String(t.getHours()).padStart(2, "0") + ":" +
+        String(t.getMinutes()).padStart(2, "0") + " from the Google Sheet (refreshes hourly).", "good");
+    }).catch(function (e) {
+      setWmFetchStatus("Could not reach the Google Sheet (" + e.message +
+        ") - showing the last values loaded. Numbers can still be typed in manually.", "bad");
+    });
   }
 
   /* the Master's Weekly Update tab runs Monday to Sunday */
@@ -2067,6 +2153,10 @@
   load();
   renderDayContext();
   compute();
+
+  autoFetchWm();
+  setInterval(autoFetchWm, WM_FETCH_INTERVAL_MS);
+  el("btn-wm-refresh").addEventListener("click", autoFetchWm);
 
   document.addEventListener("input", function (e) {
     if (e.target.id === "f-date") { load(); renderDayContext(); }
