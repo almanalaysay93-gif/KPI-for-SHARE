@@ -542,6 +542,7 @@
     cursor: pointer;
   }
   .row-remove:hover { color: var(--crit); border-color: var(--crit); }
+  tr.routine-hidden { display: none; }
   tr.total td {
     border-top: 1.5px solid var(--ink);
     border-bottom: 0;
@@ -850,6 +851,7 @@
       <tbody id="routine-body"></tbody>
     </table>
     <button class="btn no-print" id="btn-add-routine" style="margin-top:8px">+ Add routine</button>
+    <button class="btn no-print" id="btn-show-hidden-routines" style="margin-top:8px;margin-left:8px" hidden>Show removed rows (0)</button>
   </section>
 
   <!-- ADMIN + OUTREACH -->
@@ -1209,7 +1211,8 @@
   function buildRoutine() {
     el("routine-body").innerHTML = ROUTINE.map(function (r, i) {
       return "<tr>" +
-          "<td>" + r + "</td>" +
+          "<td class='routine-name-cell'><span>" + r + "</span>" +
+            "<button type='button' class='row-remove no-print' data-hide-routine='" + i + "' title='Remove this row'>&times;</button></td>" +
           "<td class='num'><input type='number' class='act-count' min='0' step='1' data-r='std' placeholder='0'></td>" +
           "<td class='num'><input type='number' class='act-count' min='0' step='1' data-r='count' placeholder='0'></td>" +
           "<td class='num act-sub' data-r='sub'>&mdash;</td>" +
@@ -1244,6 +1247,33 @@
       "</tr>" +
       "<tr class='narr-row' data-narr-routine='" + i + "' hidden><td colspan='7' style='border-bottom:1px solid var(--rule);padding:0'>" +
         "<div class='narr' style='margin-left:4px'></div></td></tr>");
+  }
+
+  /* fixed OTSU rows can't be deleted from the DOM without shifting every
+     index used elsewhere (ROUTINE_PHRASE[i], researchProjectName(i), the
+     narr-row wiring) - hiding instead keeps every index stable */
+  function hideRoutine(i) {
+    var sel = document.querySelector("[data-routine='" + i + "']");
+    if (!sel) { return; }
+    sel.closest("tr").classList.add("routine-hidden");
+    var narrRow = document.querySelector("[data-narr-routine='" + i + "']");
+    if (narrRow) { narrRow.classList.add("routine-hidden"); }
+    refreshHiddenRoutineCount();
+  }
+
+  function showAllHiddenRoutines() {
+    Array.prototype.forEach.call(document.querySelectorAll(".routine-hidden"), function (row) {
+      row.classList.remove("routine-hidden");
+    });
+    refreshHiddenRoutineCount();
+  }
+
+  function refreshHiddenRoutineCount() {
+    var n = document.querySelectorAll("tr.routine-hidden:not(.narr-row)").length;
+    var btn = el("btn-show-hidden-routines");
+    if (!btn) { return; }
+    btn.hidden = n === 0;
+    btn.textContent = "Show removed rows (" + n + ")";
   }
 
   function removeCustomRoutine(i) {
@@ -1700,6 +1730,7 @@
       var i = parseInt(sel.getAttribute("data-routine"), 10);
       var holder = document.querySelector("[data-narr-routine='" + i + "']");
       var row = sel.closest("tr");
+      if (row.classList.contains("routine-hidden")) { return; }
       var phrase = routinePhraseFor(i, row);
       var research = researchProjectName(i);
       var isPrep = research && sel.value === "Ongoing";
@@ -1912,6 +1943,9 @@
       if (row.hasAttribute("data-custom")) {
         entry.name = row.querySelector("[data-r=name]").value;
       }
+      if (row.classList.contains("routine-hidden")) {
+        entry.hidden = true;
+      }
       data.routine.push(entry);
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-admin]"), function (c) {
@@ -1949,8 +1983,10 @@
 
     /* recreate any coordinator-added rows from a saved day before mapping
        values onto them by position; clear first so switching dates doesn't
-       pile new rows on top of a previous date's custom rows */
+       pile new rows on top of a previous date's custom rows. Un-hide fixed
+       rows too, since a hide is per-day and a different date may not share it */
     clearCustomRoutines();
+    showAllHiddenRoutines();
     var savedExtra = (data.routine || []).length - ROUTINE.length;
     for (var k = 0; k < savedExtra; k++) {
       var savedEntry = data.routine[ROUTINE.length + k];
@@ -1966,6 +2002,7 @@
         row.querySelector("[data-r=count]").value = v.count || "";
         row.querySelector("[data-r=start]").value = v.start || "";
         rSels[i].value = v.status || "";
+        if (v.hidden) { hideRoutine(i); }
       } else {
         /* a day saved before std min / count existed on Daily Routine */
         rSels[i].value = v || "";
@@ -2003,6 +2040,7 @@
       var raw = localStorage.getItem(storageKey());
       if (!raw) {
         clearCustomRoutines();
+        showAllHiddenRoutines();
         el("saved-note").textContent = "No saved entry for this date";
         return false;
       }
@@ -2048,9 +2086,22 @@
   });
 
   document.addEventListener("click", function (e) {
-    var btn = e.target.closest("[data-remove-routine]");
-    if (!btn) { return; }
-    removeCustomRoutine(parseInt(btn.getAttribute("data-remove-routine"), 10));
+    var removeBtn = e.target.closest("[data-remove-routine]");
+    if (removeBtn) {
+      removeCustomRoutine(parseInt(removeBtn.getAttribute("data-remove-routine"), 10));
+      compute();
+      return;
+    }
+    var hideBtn = e.target.closest("[data-hide-routine]");
+    if (hideBtn) {
+      hideRoutine(parseInt(hideBtn.getAttribute("data-hide-routine"), 10));
+      compute();
+      return;
+    }
+  });
+
+  el("btn-show-hidden-routines").addEventListener("click", function () {
+    showAllHiddenRoutines();
     compute();
   });
 
