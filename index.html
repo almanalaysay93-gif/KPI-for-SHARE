@@ -289,6 +289,13 @@
   .roleset input:checked + span { color: var(--accent); }
   .roleset label:has(input:checked) { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
   .roleset label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .role-add { display: flex; gap: 4px; margin-top: 4px; }
+  .role-add input {
+    flex: 1 1 auto;
+    font-size: 10.5px;
+    padding: 3px 5px;
+  }
+  .role-add .btn { padding: 3px 9px; font-size: 10px; }
 
   .daycontext {
     font: 600 10px/1.35 var(--sans);
@@ -511,7 +518,12 @@
   .narrative p { margin: 0 0 7px; }
   .narrative p:last-child { margin-bottom: 0; }
   .narrative .empty { color: var(--ink-3); font-style: italic; }
-  #btn-copy { margin-top: 8px; }
+  .narrative[contenteditable="true"] {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    background: var(--accent-soft);
+  }
+  #btn-copy, #btn-edit-narrative, #btn-reset-narrative { margin-top: 8px; margin-right: 6px; }
 
   /* ---------- activity log ---------- */
   .actgroup {
@@ -700,9 +712,12 @@
     </div>
     <div class="idcell">
       <span class="lbl">Role</span>
-      <div class="roleset">
+      <div class="roleset" id="roleset">
         <label><input type="radio" name="role" value="PTC_RN" checked><span>PTC&middot;RN</span></label>
-        <label><input type="radio" name="role" value="PTC_MD"><span>PTC&middot;MD</span></label>
+      </div>
+      <div class="role-add no-print">
+        <input type="text" id="new-role-name" placeholder="Add role...">
+        <button type="button" class="btn" id="btn-add-role">+</button>
       </div>
     </div>
     <div class="idcell">
@@ -872,9 +887,11 @@
       <h2>Narrative accomplishment report</h2>
       <span class="src">auto-generated from every entry on both sheets</span>
     </div>
-    <p class="legend no-print"><strong>How to fill up:</strong> nothing &mdash; this writes itself from every entry above as you make it. Copy it once the sheet is complete.</p>
+    <p class="legend no-print"><strong>How to fill up:</strong> nothing &mdash; this writes itself from every entry above as you make it. Click Edit to rewrite it by hand; Copy it once the sheet is complete.</p>
     <div class="narrative" id="narrative-out"></div>
     <button class="btn no-print" id="btn-copy">Copy narrative</button>
+    <button class="btn no-print" id="btn-edit-narrative">Edit narrative</button>
+    <button class="btn no-print" id="btn-reset-narrative" hidden>Reset to auto-generated</button>
   </section>
 
   <!-- OTHERS -->
@@ -915,13 +932,49 @@
   "use strict";
 
   var SHIFT_MIN = 480;          // 7:00 AM - 3:00 PM
+  var narrativeEdited = false;  // true once the coordinator hand-edits the narrative
 
   var STATUSES = ["", "Completed", "Ongoing", "Pending", "Deferred", "Cancelled"];
 
   var ROLE_LABEL = {
-    PTC_RN: "Procurement Transplant Coordinator, RN (PTC/RN)",
-    PTC_MD: "Procurement Transplant Coordinator, MD (PTC/MD)"
+    PTC_RN: "Procurement Transplant Coordinator, RN (PTC/RN)"
   };
+
+  /* coordinator-added roles - kept in their own registry, not tied to any
+     single saved day, since a role is an org fact, not a daily answer */
+  var CUSTOM_ROLE_LABELS = {};
+  var customRoleCount = 0;
+  var CUSTOM_ROLES_KEY = "share-tc-dash:custom-roles";
+
+  function addRole(name, existingValue) {
+    name = (name || "").trim();
+    if (!name) { return; }
+    var value = existingValue;
+    if (!value) {
+      customRoleCount++;
+      value = "CUSTOM_" + customRoleCount;
+    }
+    CUSTOM_ROLE_LABELS[value] = name;
+    el("roleset").insertAdjacentHTML("beforeend",
+      "<label><input type='radio' name='role' value='" + esc(value) + "'><span>" + esc(name) + "</span></label>");
+  }
+
+  function loadCustomRoles() {
+    try {
+      var raw = localStorage.getItem(CUSTOM_ROLES_KEY);
+      if (!raw) { return; }
+      JSON.parse(raw).forEach(function (r) { addRole(r.name, r.value); });
+    } catch (e) { /* ignore corrupt storage */ }
+  }
+
+  function saveCustomRoles() {
+    try {
+      var arr = Object.keys(CUSTOM_ROLE_LABELS).map(function (v) {
+        return { value: v, name: CUSTOM_ROLE_LABELS[v] };
+      });
+      localStorage.setItem(CUSTOM_ROLES_KEY, JSON.stringify(arr));
+    } catch (e) { /* storage unavailable - role just won't persist */ }
+  }
 
   /* ---------- source data ---------- */
 
@@ -1928,7 +1981,7 @@
     var name    = el("f-name").value.trim();
     var date    = el("f-date").value;
     var roleKey = document.querySelector("input[name=role]:checked").value;
-    var role    = ROLE_LABEL[roleKey] || roleKey.replace("_", "/");
+    var role    = ROLE_LABEL[roleKey] || CUSTOM_ROLE_LABELS[roleKey] || roleKey.replace("_", "/");
 
     /* --- opening: who, in what role, on which day, against what schedule --- */
     var html = "";
@@ -1975,7 +2028,11 @@
       html = "<p class='empty'>Nothing logged yet. Tick a task, set a status, or enter a count and its narrative appears here automatically.</p>";
     }
 
-    el("narrative-out").innerHTML = html;
+    /* once the coordinator starts hand-editing, stop overwriting their
+       wording every time an unrelated field changes and re-triggers compute() */
+    if (!narrativeEdited) {
+      el("narrative-out").innerHTML = html;
+    }
   }
 
   /* flags rows/sections with nothing entered, so print can hide them -
@@ -2065,11 +2122,23 @@
       });
       data.charter.push(o);
     });
+    if (narrativeEdited) {
+      data.narrativeEdited = true;
+      data.narrativeHtml = el("narrative-out").innerHTML;
+    }
     return data;
   }
 
   function apply(data) {
     if (!data) { return; }
+
+    narrativeEdited = !!data.narrativeEdited;
+    el("btn-reset-narrative").hidden = !narrativeEdited;
+    el("btn-edit-narrative").textContent = "Edit narrative";
+    el("narrative-out").removeAttribute("contenteditable");
+    if (narrativeEdited && data.narrativeHtml !== undefined) {
+      el("narrative-out").innerHTML = data.narrativeHtml;
+    }
 
     Object.keys(data.fields || {}).forEach(function (id) {
       if (id === "role") { return; }
@@ -2148,6 +2217,10 @@
       if (!raw) {
         clearCustomRoutines();
         showAllHiddenRoutines();
+        narrativeEdited = false;
+        el("btn-reset-narrative").hidden = true;
+        el("btn-edit-narrative").textContent = "Edit narrative";
+        el("narrative-out").removeAttribute("contenteditable");
         el("saved-note").textContent = "No saved entry for this date";
         return false;
       }
@@ -2165,6 +2238,7 @@
   buildCharter();
   buildRoutine();
   buildAdmin();
+  loadCustomRoles();
 
   var today = new Date();
   el("f-date").value = today.getFullYear() + "-" +
@@ -2187,6 +2261,13 @@
 
   document.addEventListener("change", function (e) {
     compute();
+  });
+
+  el("btn-add-role").addEventListener("click", function () {
+    var input = el("new-role-name");
+    addRole(input.value);
+    saveCustomRoles();
+    input.value = "";
   });
 
   el("btn-add-routine").addEventListener("click", function () {
@@ -2220,6 +2301,31 @@
   el("btn-import-clear").addEventListener("click", function () {
     el("imp-paste").value = "";
     status("");
+  });
+
+  el("btn-edit-narrative").addEventListener("click", function () {
+    var box = el("narrative-out");
+    var editing = box.getAttribute("contenteditable") === "true";
+    if (editing) {
+      box.removeAttribute("contenteditable");
+      el("btn-edit-narrative").textContent = "Edit narrative";
+      save(true);
+    } else {
+      narrativeEdited = true;
+      box.setAttribute("contenteditable", "true");
+      box.focus();
+      el("btn-edit-narrative").textContent = "Done editing";
+      el("btn-reset-narrative").hidden = false;
+    }
+  });
+
+  el("btn-reset-narrative").addEventListener("click", function () {
+    narrativeEdited = false;
+    el("narrative-out").removeAttribute("contenteditable");
+    el("btn-edit-narrative").textContent = "Edit narrative";
+    el("btn-reset-narrative").hidden = true;
+    renderNarrative();
+    save(true);
   });
 
   el("btn-copy").addEventListener("click", function () {
