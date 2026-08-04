@@ -36,7 +36,8 @@ function json_(obj) {
 }
 
 function doGet(e) {
-  var date = e.parameter.date;
+  e = e || {};
+  var date = (e.parameter || {}).date;
   if (!date) { return json_({ error: "missing date" }); }
 
   var sheet = getSheet_();
@@ -54,9 +55,9 @@ function doGet(e) {
 function doPost(e) {
   var body;
   try {
-    body = JSON.parse(e.postData.contents);
+    body = JSON.parse((e || {}).postData.contents);
   } catch (err) {
-    return json_({ ok: false, error: "invalid JSON body" });
+    return json_({ ok: false, error: "invalid JSON body (this endpoint expects a real POST, not the editor's Run button)" });
   }
 
   var date = body.date;

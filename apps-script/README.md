@@ -38,6 +38,25 @@ way. Nothing patient-identifiable is stored here.
 5. Copy the **Web app URL** it gives you - looks like
    `https://script.google.com/macros/s/AKfycb.../exec`.
 
+## Testing it directly (optional)
+
+Don't use the editor's **Run** button on `doGet`/`doPost` to test - that
+runs the function with no request info at all and throws
+`Cannot read properties of undefined (reading 'parameter')`. That's
+expected; it just means it wasn't tested the way a browser actually calls
+it.
+
+To test for real, paste the deployed URL into a browser's address bar
+with a date on the end, e.g.:
+
+```
+https://script.google.com/macros/s/AKfycb.../exec?date=2026-08-04
+```
+
+You should get back `{"found":false}` (nothing saved yet) rather than an
+error page. If you get an error page instead, the deployment's access
+setting is probably still wrong - it needs to be "Anyone."
+
 ## 4. Connect the dashboard
 
 1. Open the KPI dashboard, expand **Cloud sync (Google Sheets backend)**
