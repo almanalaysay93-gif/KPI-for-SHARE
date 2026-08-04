@@ -657,6 +657,26 @@
   <span class="saved-note" id="saved-note">Not saved yet</span>
 </div>
 
+<details class="importer no-print" id="sync-settings">
+  <summary>Cloud sync (Google Sheets backend)</summary>
+
+  <p class="how">
+    Paste the Web App URL from your deployed Apps Script backend (see
+    <code>apps-script/README.md</code> in the repo for setup steps). Once set, Save also writes to
+    that Sheet, and opening a date checks it first &mdash; reachable from any device, not just this
+    browser. Leave blank to keep using this browser&#39;s own storage only.
+  </p>
+
+  <div class="imp-controls">
+    <input type="text" id="sync-url" placeholder="https://script.google.com/macros/s/&hellip;/exec"
+           style="flex:1 1 260px;font-family:var(--mono);font-size:11px;">
+    <button class="btn btn-primary" id="btn-sync-save-url">Save URL</button>
+    <button class="btn" id="btn-sync-clear-url">Clear</button>
+  </div>
+
+  <div class="imp-status" id="sync-status">No cloud backend configured &mdash; using this browser&#39;s storage only.</div>
+</details>
+
 <details class="importer no-print" id="importer">
   <summary>Load from POMD Referral Master 2026</summary>
 
@@ -2080,6 +2100,59 @@
     return "share-tc-dash:" + (el("f-date").value || "undated");
   }
 
+  /* ---------- cloud sync (Apps Script + Sheets backend) ----------
+     Optional: with no URL configured, everything works exactly as before,
+     localStorage-only. With a URL, localStorage stays as the instant local
+     cache/offline fallback, and the Sheet becomes the reachable-from-
+     anywhere copy. POST uses text/plain to dodge the CORS preflight that
+     Apps Script Web Apps don't answer (a well-known Apps Script quirk) -
+     the body is still JSON, doPost() just reads it off postData.contents
+     regardless of the declared content type. */
+  var SYNC_URL_KEY = "share-tc-dash:sync-url";
+
+  function getSyncUrl() { return localStorage.getItem(SYNC_URL_KEY) || ""; }
+
+  function nowHHMM() {
+    var t = new Date();
+    return String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
+  }
+
+  function setSyncStatus(msg, cls) {
+    var box = el("sync-status");
+    if (!box) { return; }
+    box.textContent = msg;
+    box.className = "imp-status" + (cls ? " " + cls : "");
+  }
+
+  function syncSaveToCloud(dateStr, data) {
+    var url = getSyncUrl();
+    if (!url) { return; }
+    setSyncStatus("Syncing…");
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ date: dateStr, data: data })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res && res.ok) {
+        setSyncStatus("Synced to cloud " + nowHHMM() + ".", "good");
+      } else {
+        setSyncStatus("Cloud save did not confirm - check the Web App URL.", "bad");
+      }
+    }).catch(function (e) {
+      setSyncStatus("Could not reach cloud backend (" + e.message + ") - saved locally only.", "bad");
+    });
+  }
+
+  function syncLoadFromCloud(dateStr) {
+    var url = getSyncUrl();
+    if (!url) { return Promise.resolve(null); }
+    var sep = url.indexOf("?") > -1 ? "&" : "?";
+    return fetch(url + sep + "date=" + encodeURIComponent(dateStr))
+      .then(function (r) { return r.json(); })
+      .then(function (res) { return (res && res.found) ? res.data : null; })
+      .catch(function () { return null; });
+  }
+
   function collect() {
     var data = { fields: {}, wm: {}, routine: [], admin: [], charter: [] };
 
@@ -2199,8 +2272,9 @@
   }
 
   function save(silent) {
+    var data = collect();
     try {
-      localStorage.setItem(storageKey(), JSON.stringify(collect()));
+      localStorage.setItem(storageKey(), JSON.stringify(data));
       var t = new Date();
       el("saved-note").textContent = "Saved " +
         String(t.getHours()).padStart(2, "0") + ":" +
@@ -2209,9 +2283,13 @@
     } catch (e) {
       if (!silent) { el("saved-note").textContent = "Could not save - storage unavailable"; }
     }
+    syncSaveToCloud(el("f-date").value, data);
   }
 
+  /* local storage first (instant, works offline), then reconciled against
+     the cloud copy a moment later if a sync URL is configured */
   function load() {
+    var localOk;
     try {
       var raw = localStorage.getItem(storageKey());
       if (!raw) {
@@ -2222,14 +2300,38 @@
         el("btn-edit-narrative").textContent = "Edit narrative";
         el("narrative-out").removeAttribute("contenteditable");
         el("saved-note").textContent = "No saved entry for this date";
-        return false;
+        localOk = false;
+      } else {
+        apply(JSON.parse(raw));
+        el("saved-note").textContent = "Loaded saved entry for " + el("f-date").value;
+        localOk = true;
       }
-      apply(JSON.parse(raw));
-      el("saved-note").textContent = "Loaded saved entry for " + el("f-date").value;
-      return true;
     } catch (e) {
-      return false;
+      localOk = false;
     }
+
+    var url = getSyncUrl();
+    if (url) {
+      var dateStr = el("f-date").value;
+      setSyncStatus("Checking cloud for " + dateStr + "…");
+      syncLoadFromCloud(dateStr).then(function (cloudData) {
+        if (dateStr !== el("f-date").value) { return; } // date changed again while this was in flight
+        if (cloudData) {
+          apply(cloudData);
+          renderDayContext();
+          compute();
+          try { localStorage.setItem(storageKey(), JSON.stringify(cloudData)); } catch (e) { /* cache best-effort */ }
+          el("saved-note").textContent = "Loaded from cloud for " + dateStr;
+          setSyncStatus("Loaded from cloud " + nowHHMM() + ".", "good");
+        } else {
+          setSyncStatus(localOk
+            ? "No cloud entry for " + dateStr + " yet - showing this browser's local copy."
+            : "No cloud or local entry for " + dateStr + ".", "");
+        }
+      });
+    }
+
+    return localOk;
   }
 
   /* ---------- wire up ---------- */
@@ -2295,6 +2397,26 @@
   el("btn-show-hidden-routines").addEventListener("click", function () {
     showAllHiddenRoutines();
     compute();
+  });
+
+  el("sync-url").value = getSyncUrl();
+  if (getSyncUrl()) {
+    el("sync-settings").open = true;
+    setSyncStatus("Cloud sync configured. Checking…");
+  }
+
+  el("btn-sync-save-url").addEventListener("click", function () {
+    var url = el("sync-url").value.trim();
+    if (!url) { setSyncStatus("Enter a Web App URL first, or use Clear to remove sync.", "bad"); return; }
+    localStorage.setItem(SYNC_URL_KEY, url);
+    setSyncStatus("Saved. Checking connection…");
+    load();
+  });
+
+  el("btn-sync-clear-url").addEventListener("click", function () {
+    localStorage.removeItem(SYNC_URL_KEY);
+    el("sync-url").value = "";
+    setSyncStatus("No cloud backend configured - using this browser's storage only.");
   });
 
   el("btn-import").addEventListener("click", runImport);
