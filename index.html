@@ -832,13 +832,6 @@
         </tr>
       </thead>
       <tbody id="routine-body"></tbody>
-      <tfoot>
-        <tr class="total">
-          <td colspan="3">Productive minutes logged</td>
-          <td class="num act-sub" id="act-total">0</td>
-          <td colspan="3" class="mono" id="act-total-note" style="font-size:10px;color:var(--ink-3)">of 480 shift min</td>
-        </tr>
-      </tfoot>
     </table>
     <p class="funnote">
       Ended is calculated from Started plus Std min, and is left blank until both are entered.
@@ -1287,17 +1280,6 @@
       };
     });
     return out;
-  }
-
-  /* the Citizen's Charter table is the one place clients-served is entered -
-     its minutes feed the workload index alongside daily routine's own subtotal */
-  function charterMinutes() {
-    var total = 0;
-    Array.prototype.forEach.call(document.querySelectorAll("#charter-body tr"), function (row, i) {
-      var served = parseFloat(row.querySelector("[data-cc=served]").value) || 0;
-      total += served * CHARTER[i][2];
-    });
-    return total;
   }
 
   /* std min has no published source for these 18 tasks - the coordinator
@@ -1818,17 +1800,11 @@
   }
 
   function compute() {
-    var routine = computeRoutine();
-    var mins = routine.minutes + charterMinutes();
+    computeRoutine();
     computeFunnel(computeDbi());
     computeWm();
     renderPeriod();
     markPrintVisibility();
-
-    /* the daily routine table's own running total, at its foot */
-    el("act-total").textContent = mins;
-    el("act-total-note").textContent = "of " + SHIFT_MIN + " shift min / index " +
-                                       (mins / SHIFT_MIN).toFixed(2);
 
     renderNarrative();
   }
